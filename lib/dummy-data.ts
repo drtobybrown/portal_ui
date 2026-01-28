@@ -69,61 +69,107 @@ export const activeSessions = [
   },
 ]
 
-// Session templates for the launcher
-export const sessionTemplates = [
+// Session types matching CANFAR CLI: desktop, notebook, carta, firefly, contributed
+export const sessionTypes = [
   {
-    id: "jupyter",
-    name: "Data Analysis",
-    description: "Python/Jupyter Notebook environment with common astronomy packages pre-installed",
+    id: "notebook",
+    name: "Notebook",
+    description: "Jupyter Notebook environment",
     icon: "BookOpen",
-    defaultCpu: 2,
-    defaultRam: 8,
+    popular: true,
+  },
+  {
+    id: "carta",
+    name: "CARTA",
+    description: "Cube Analysis and Rendering Tool for Astronomy",
+    icon: "Radio",
+    popular: true,
+  },
+  {
+    id: "desktop",
+    name: "Desktop",
+    description: "Full Linux desktop environment with GUI",
+    icon: "Monitor",
+    popular: false,
+  },
+  {
+    id: "firefly",
+    name: "Firefly",
+    description: "IPAC Firefly visualization tool",
+    icon: "Flame",
+    popular: false,
+  },
+  {
+    id: "contributed",
+    name: "Contributed",
+    description: "Community-contributed session types",
+    icon: "Users",
+    popular: false,
+  },
+]
+
+// Container images organized by session type (matching CANFAR image registry)
+export const containerImages: Record<string, { id: string; name: string; tag: string; description?: string }[]> = {
+  notebook: [
+    { id: "images.canfar.net/skaha/astroml:latest", name: "AstroML", tag: "latest", description: "Machine learning for astronomy" },
+    { id: "images.canfar.net/skaha/jupyter-scipy:latest", name: "Jupyter SciPy", tag: "latest", description: "Scientific Python stack" },
+    { id: "images.canfar.net/skaha/casa-notebook:6.5", name: "CASA Notebook", tag: "6.5", description: "CASA with Jupyter integration" },
+    { id: "images.canfar.net/skaha/astropy:latest", name: "Astropy", tag: "latest", description: "Core astronomy packages" },
+  ],
+  carta: [
+    { id: "images.canfar.net/skaha/carta:4.1", name: "CARTA", tag: "4.1", description: "Official CARTA release" },
+    { id: "images.canfar.net/skaha/carta:3.0", name: "CARTA", tag: "3.0", description: "Legacy version" },
+  ],
+  desktop: [
+    { id: "images.canfar.net/skaha/desktop:ubuntu22", name: "Ubuntu Desktop", tag: "ubuntu22", description: "Ubuntu 22.04 with XFCE" },
+    { id: "images.canfar.net/skaha/desktop:astro", name: "Astro Desktop", tag: "astro", description: "Desktop with astronomy tools" },
+  ],
+  firefly: [
+    { id: "images.canfar.net/skaha/firefly:latest", name: "Firefly", tag: "latest", description: "IPAC Firefly viewer" },
+  ],
+  contributed: [
+    { id: "images.canfar.net/contrib/custom-analysis:latest", name: "Custom Analysis", tag: "latest", description: "User contributed" },
+  ],
+}
+
+// Quick launch templates (pre-configured combinations)
+export const quickLaunchTemplates = [
+  {
+    id: "astroml",
+    name: "Data Analysis",
+    description: "Python/Jupyter with astronomy ML packages",
+    kind: "notebook",
+    image: "images.canfar.net/skaha/astroml:latest",
+    icon: "BookOpen",
     popular: true,
   },
   {
     id: "carta",
     name: "Radio Imaging",
-    description: "CARTA - Cube Analysis and Rendering Tool for Astronomy",
+    description: "CARTA visualization for radio data",
+    kind: "carta",
+    image: "images.canfar.net/skaha/carta:4.1",
     icon: "Radio",
-    defaultCpu: 4,
-    defaultRam: 16,
     popular: true,
   },
   {
     id: "desktop",
     name: "Full Desktop",
-    description: "Complete Linux desktop environment with GUI applications",
+    description: "Linux desktop with GUI applications",
+    kind: "desktop",
+    image: "images.canfar.net/skaha/desktop:ubuntu22",
     icon: "Monitor",
-    defaultCpu: 2,
-    defaultRam: 4,
     popular: false,
   },
   {
-    id: "custom",
-    name: "Custom Container",
-    description: "Launch with your own Docker image and configuration",
-    icon: "Container",
-    defaultCpu: 2,
-    defaultRam: 8,
+    id: "casa",
+    name: "CASA Analysis",
+    description: "Radio interferometry data processing",
+    kind: "notebook",
+    image: "images.canfar.net/skaha/casa-notebook:6.5",
+    icon: "Radar",
     popular: false,
   },
-]
-
-// Projects for dropdown
-export const projects = [
-  { id: "vlass", name: "VLASS - VLA Sky Survey" },
-  { id: "alma", name: "ALMA Data Processing" },
-  { id: "hst", name: "HST Imaging Pipeline" },
-  { id: "jwst", name: "JWST Analysis" },
-  { id: "personal", name: "Personal Research" },
-]
-
-// Container images
-export const containerImages = [
-  { id: "jupyter-astro", name: "Jupyter Astronomy Stack", version: "3.2.1" },
-  { id: "carta", name: "CARTA Official", version: "4.1.0" },
-  { id: "casa", name: "CASA Radio Analysis", version: "6.5.0" },
-  { id: "ubuntu-desktop", name: "Ubuntu Desktop", version: "22.04" },
 ]
 
 // System status
