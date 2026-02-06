@@ -39,6 +39,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
         'fixed left-0 top-0 z-40 flex h-screen flex-col bg-secondary transition-all duration-300',
         collapsed ? 'w-16' : 'w-60'
       )}
+      role="navigation"
+      aria-label="Main navigation"
     >
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
@@ -53,7 +55,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-2 py-4">
-        {navigationItems.map((item) => {
+        {navigationItems.map(item => {
           const isActive = pathname === item.href
           const Icon = item.icon
 
@@ -78,9 +80,11 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
                     'h-5 w-5 flex-shrink-0 transition-colors',
                     isActive ? 'text-white' : 'text-gray-400 group-hover:text-white'
                   )}
+                  aria-hidden="true"
                 />
               </div>
               {!collapsed && <span>{item.name}</span>}
+              {collapsed && <span className="sr-only">{item.name}</span>}
             </Link>
           )
         })}
@@ -91,11 +95,12 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
         <button
           onClick={onToggle}
           className="flex w-full items-center justify-center rounded-lg p-2 text-gray-400 transition-colors hover:bg-white/5 hover:text-white"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           {collapsed ? (
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-5 w-5" aria-hidden="true" />
           ) : (
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-5 w-5" aria-hidden="true" />
           )}
         </button>
       </div>

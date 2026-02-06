@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Monitor, Plus, Search, Filter } from 'lucide-react'
+import { Plus, Search, Filter } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -49,7 +49,7 @@ export default function SessionsPage() {
 
       {/* Sessions Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {activeSessions.map((session) => (
+        {activeSessions.map(session => (
           <Card key={session.id} className="group">
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">

@@ -25,9 +25,7 @@ export default function StoragePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-secondary">Data & Storage</h1>
-          <p className="text-sm text-gray-500">
-            Manage your VOSpace files and storage quotas
-          </p>
+          <p className="text-sm text-gray-500">Manage your VOSpace files and storage quotas</p>
         </div>
         <Button variant="primary">
           <Upload className="mr-2 h-4 w-4" />
@@ -48,7 +46,11 @@ export default function StoragePage() {
               </span>
               <span className="font-medium text-secondary">{homePercentage}%</span>
             </div>
-            <Progress value={userStorage.home.used} max={userStorage.home.quota} variant="success" />
+            <Progress
+              value={userStorage.home.used}
+              max={userStorage.home.quota}
+              variant="success"
+            />
           </CardContent>
         </Card>
 
@@ -77,9 +79,7 @@ export default function StoragePage() {
             <HardDrive className="h-5 w-5 text-gray-400" />
             <CardTitle className="text-base">VOSpace Browser</CardTitle>
           </div>
-          <div className="text-sm text-gray-500">
-            /home/thbrown
-          </div>
+          <div className="text-sm text-gray-500">/home/thbrown</div>
         </CardHeader>
         <CardContent>
           <div className="rounded-lg border">
@@ -89,7 +89,7 @@ export default function StoragePage() {
               <div className="col-span-3">Modified</div>
               <div className="col-span-1"></div>
             </div>
-            {dummyFiles.map((file) => (
+            {dummyFiles.map(file => (
               <div
                 key={file.name}
                 className="grid grid-cols-12 gap-4 border-b px-4 py-3 text-sm last:border-0 hover:bg-gray-50"

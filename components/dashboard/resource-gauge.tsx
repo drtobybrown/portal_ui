@@ -54,9 +54,7 @@ function CircularGauge({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-lg font-semibold text-secondary">
-            {percentage.toFixed(0)}%
-          </span>
+          <span className="text-lg font-semibold text-secondary">{percentage.toFixed(0)}%</span>
         </div>
       </div>
       <span className="mt-2 text-sm font-medium text-gray-600">{label}</span>
@@ -65,9 +63,6 @@ function CircularGauge({
 }
 
 export function ComputeResourceCard() {
-  const cpuPercentage = formatPercentage(platformLoad.cpus.used, platformLoad.cpus.total)
-  const ramPercentage = formatPercentage(platformLoad.ram.used, platformLoad.ram.total)
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -96,7 +91,7 @@ export function ComputeResourceCard() {
             color="#F5AA1C"
           />
         </div>
-        
+
         <div className="mt-4 space-y-3 border-t pt-4">
           <div className="flex items-center justify-between text-sm">
             <span className="text-gray-500">Available CPUs</span>
@@ -111,10 +106,8 @@ export function ComputeResourceCard() {
             </span>
           </div>
         </div>
-        
-        <p className="mt-4 text-xs text-gray-400">
-          Last updated: {platformLoad.lastUpdate}
-        </p>
+
+        <p className="mt-4 text-xs text-gray-400">Last updated: {platformLoad.lastUpdate}</p>
       </CardContent>
     </Card>
   )
@@ -152,8 +145,12 @@ export function StorageResourceCard() {
               size="md"
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
-              <span>{userStorage.home.used} {userStorage.home.unit} used</span>
-              <span>{userStorage.home.quota} {userStorage.home.unit} quota</span>
+              <span>
+                {userStorage.home.used} {userStorage.home.unit} used
+              </span>
+              <span>
+                {userStorage.home.quota} {userStorage.home.unit} quota
+              </span>
             </div>
           </div>
 
@@ -170,15 +167,17 @@ export function StorageResourceCard() {
               size="md"
             />
             <div className="mt-1 flex justify-between text-xs text-gray-500">
-              <span>{userStorage.scratch.used} {userStorage.scratch.unit} used</span>
-              <span>{userStorage.scratch.quota} {userStorage.scratch.unit} quota</span>
+              <span>
+                {userStorage.scratch.used} {userStorage.scratch.unit} used
+              </span>
+              <span>
+                {userStorage.scratch.quota} {userStorage.scratch.unit} quota
+              </span>
             </div>
           </div>
         </div>
 
-        <p className="mt-2 text-xs text-gray-400">
-          Last updated: {userStorage.lastUpdate}
-        </p>
+        <p className="mt-2 text-xs text-gray-400">Last updated: {userStorage.lastUpdate}</p>
       </CardContent>
     </Card>
   )

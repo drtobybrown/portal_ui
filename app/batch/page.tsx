@@ -38,9 +38,7 @@ export default function BatchPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-secondary">Batch Processing</h1>
-          <p className="text-sm text-gray-500">
-            Submit and monitor batch processing jobs
-          </p>
+          <p className="text-sm text-gray-500">Submit and monitor batch processing jobs</p>
         </div>
         <Button variant="primary">
           <Plus className="mr-2 h-4 w-4" />
@@ -118,7 +116,7 @@ export default function BatchPage() {
               <div className="col-span-2">Completed</div>
               <div className="col-span-2">CPU Hours</div>
             </div>
-            {recentJobs.map((job) => {
+            {recentJobs.map(job => {
               const config = statusConfig[job.status]
               const Icon = config.icon
 
@@ -127,26 +125,15 @@ export default function BatchPage() {
                   key={job.id}
                   className="grid grid-cols-12 gap-4 border-b px-4 py-3 text-sm last:border-0 hover:bg-gray-50"
                 >
-                  <div className="col-span-4 font-medium text-secondary">
-                    {job.name}
-                  </div>
+                  <div className="col-span-4 font-medium text-secondary">{job.name}</div>
                   <div className="col-span-2">
                     <Badge variant={config.badge} className="gap-1">
-                      <Icon
-                        className={cn(
-                          'h-3 w-3',
-                          job.status === 'running' && 'animate-spin'
-                        )}
-                      />
+                      <Icon className={cn('h-3 w-3', job.status === 'running' && 'animate-spin')} />
                       {job.status}
                     </Badge>
                   </div>
-                  <div className="col-span-2 text-gray-500">
-                    {job.startedAt || '-'}
-                  </div>
-                  <div className="col-span-2 text-gray-500">
-                    {job.completedAt || '-'}
-                  </div>
+                  <div className="col-span-2 text-gray-500">{job.startedAt || '-'}</div>
+                  <div className="col-span-2 text-gray-500">{job.completedAt || '-'}</div>
                   <div className="col-span-2 text-gray-500">
                     {job.cpuHours > 0 ? `${job.cpuHours} hrs` : '-'}
                   </div>
