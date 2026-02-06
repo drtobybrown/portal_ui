@@ -91,6 +91,10 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 - Notification preferences
 - (More sections coming soon)
 
+## Documentation
+
+- **[Architecture Summary](./ARCHITECTURE_SUMMARY.md)** — Technical architecture, data flow, extension points for developers and AI agents, and security review.
+
 ## Project Structure
 
 ```
