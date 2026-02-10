@@ -54,10 +54,10 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
   const [activeTab, setActiveTab] = React.useState<TabType>('quick')
   const [launchState, setLaunchState] = React.useState<LaunchState>('idle')
   const [launchedSessionId, setLaunchedSessionId] = React.useState<string | null>(null)
-  
+
   // Quick launch selection
   const [selectedTemplate, setSelectedTemplate] = React.useState<string | null>(null)
-  
+
   // Custom session form state (matching CANFAR CLI parameters)
   const [formData, setFormData] = React.useState({
     kind: 'notebook',
@@ -75,7 +75,7 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
     if (formData.name.startsWith(formData.kind.split('-')[0]) === false) {
       setFormData(prev => ({ ...prev, name: generateSessionName(prev.kind) }))
     }
-  }, [formData.kind])
+  }, [formData.kind, formData.name])
 
   // Reset image when kind changes
   React.useEffect(() => {
@@ -105,10 +105,10 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
 
   const handleLaunch = async () => {
     setLaunchState('launching')
-    
+
     // Build the CLI-equivalent command for logging
     let cliCommand = 'canfar create'
-    
+
     if (activeTab === 'quick' && selectedTemplate) {
       const template = quickLaunchTemplates.find(t => t.id === selectedTemplate)
       if (template) {
@@ -126,19 +126,19 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
       })
       cliCommand += ` ${formData.kind} ${formData.image}`
     }
-    
+
     console.log('CLI equivalent:', cliCommand)
-    
+
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     // Simulate success
     const sessionId = `sess-${Math.random().toString(36).substring(2, 8)}`
     setLaunchedSessionId(sessionId)
     setLaunchState('success')
   }
 
-  const canLaunch = activeTab === 'quick' 
+  const canLaunch = activeTab === 'quick'
     ? selectedTemplate !== null
     : formData.kind && formData.image
 
@@ -168,7 +168,7 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
               ID: {launchedSessionId}
             </p>
             <div className="mt-6 flex justify-center gap-3">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
               <Button variant="primary" onClick={handleClose}>

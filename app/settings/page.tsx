@@ -1,9 +1,11 @@
 'use client'
 
 import * as React from 'react'
-import { User, Bell, Shield, Palette, Key } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { User, Bell, Shield, Palette, Key, Terminal, LogOut, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { userData } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
@@ -40,8 +42,16 @@ const settingsSections = [
   },
 ]
 
-export default function SettingsPage() {
+function SettingsContent() {
   const [activeSection, setActiveSection] = React.useState('profile')
+  const searchParams = useSearchParams()
+  const section = searchParams.get('section')
+
+  React.useEffect(() => {
+    if (section && settingsSections.some(s => s.id === section)) {
+      setActiveSection(section)
+    }
+  }, [section])
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -139,6 +149,60 @@ export default function SettingsPage() {
             </Card>
           )}
 
+          {activeSection === 'security' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Security & Access</CardTitle>
+                <CardDescription>
+                  Manage your account security and SSH access keys
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-semibold text-secondary mb-4 uppercase tracking-wider">SSH Public Keys</h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-lg border bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <Key className="h-5 w-5 text-gray-400" />
+                        <div>
+                          <div className="text-sm font-medium">macbook-pro-2024</div>
+                          <div className="text-xs text-gray-500 font-mono">ssh-ed25519 AAAAC3NzaC1lZDI1NTE5...</div>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="sm" className="text-destructive">Remove</Button>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-4 border-2 border-dashed rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Add New SSH Key</label>
+                    <textarea
+                      className="w-full rounded-md border border-gray-200 p-3 text-xs font-mono mb-3"
+                      rows={3}
+                      placeholder="Paste your public key (ssh-rsa, ssh-ed25519...)"
+                    />
+                    <div className="flex justify-end">
+                      <Button variant="secondary" size="sm">Upload Key</Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t">
+                  <h3 className="text-sm font-semibold text-secondary mb-4 uppercase tracking-wider">Two-Factor Authentication</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Shield className="h-5 w-5 text-green-500" />
+                      <div>
+                        <div className="text-sm font-medium">Authentication via CANFAR Portal</div>
+                        <div className="text-xs text-gray-500">Enabled since Jan 2026</div>
+                      </div>
+                    </div>
+                    <Button variant="secondary" size="sm">Configure</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {activeSection === 'notifications' && (
             <Card>
               <CardHeader>
@@ -169,26 +233,32 @@ export default function SettingsPage() {
             </Card>
           )}
 
-          {activeSection !== 'profile' && activeSection !== 'notifications' && (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="rounded-full bg-gray-100 p-4">
-                  {React.createElement(
-                    settingsSections.find((s) => s.id === activeSection)?.icon || User,
-                    { className: 'h-8 w-8 text-gray-400' }
-                  )}
-                </div>
-                <h3 className="mt-4 font-semibold text-secondary">
-                  {settingsSections.find((s) => s.id === activeSection)?.name}
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  This section is coming soon
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="rounded-full bg-gray-100 p-4">
+                {React.createElement(
+                  settingsSections.find((s) => s.id === activeSection)?.icon || User,
+                  { className: 'h-8 w-8 text-gray-400' }
+                )}
+              </div>
+              <h3 className="mt-4 font-semibold text-secondary">
+                {settingsSections.find((s) => s.id === activeSection)?.name}
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                This section is coming soon
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
+  )
+}
+
+export default function SettingsPage() {
+  return (
+    <React.Suspense fallback={<div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+      <SettingsContent />
+    </React.Suspense>
   )
 }

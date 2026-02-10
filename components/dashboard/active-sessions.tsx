@@ -88,7 +88,9 @@ export function ActiveSessions() {
                       <span>•</span>
                       <span>{session.cpu} CPU, {session.ram} GB RAM</span>
                       <span>•</span>
-                      <span>Started {session.startedAt}</span>
+                      <span>Net: {session.network?.in}↓ / {session.network?.out}↑</span>
+                      <span>•</span>
+                      <span>Scratch: {session.scratch?.used}GB</span>
                     </div>
                   </div>
                 </div>
