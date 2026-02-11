@@ -42,12 +42,48 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
+<<<<<<< HEAD
+    <html lang="en">
+      <body className={cn(inter.className, 'bg-gray-900 text-gray-100')}>
+        {/* Sidebar */}
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+
+        {/* Mobile overlay */}
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Header */}
+        <Header
+          sidebarCollapsed={sidebarCollapsed}
+          onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        />
+
+        {/* Main content */}
+        <main
+          className={cn(
+            'min-h-screen pt-16 transition-all duration-300',
+            sidebarCollapsed ? 'pl-16' : 'pl-60'
+          )}
+        >
+          <div className="mx-auto max-w-7xl p-6">
+            {children}
+          </div>
+        </main>
+=======
     <html lang="en" className={inter.variable}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={`${inter.className} bg-gray-50 antialiased`}>
         <LayoutProvider>{children}</LayoutProvider>
+>>>>>>> origin/main
       </body>
     </html>
   )

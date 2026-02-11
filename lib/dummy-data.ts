@@ -1,7 +1,8 @@
 // User data
 export const userData = {
-  name: 'Dr. thbrown',
-  email: 'thbrown@uvic.ca',
+  name: "Dr. thbrown",
+  username: "thbrown",
+  email: "thbrown@uvic.ca",
   avatar: null, // Will use initials
 }
 
@@ -27,12 +28,41 @@ export const userStorage = {
     quota: 291.0,
     unit: 'GB',
   },
+  // Replaced scratch with team/project storage
+  projects: [
+    { name: "VLASS", used: 450, quota: 1000, unit: "GB", type: "vault" },
+    { name: "ALMA-Large-Program", used: 12.5, quota: 50, unit: "TB", type: "vault" },
+    { name: "CIRADA", used: 850, quota: 2000, unit: "GB", type: "arc" },
+  ],
   scratch: {
     used: 145.3,
     quota: 500.0,
     unit: 'GB',
   },
   lastUpdate: '2026-01-22 06:09:10 UTC',
+}
+
+// Mock File System Data
+export const mockFileSystem = {
+  home: [
+    { name: 'notebooks', type: 'folder', size: '-', modified: '2026-01-25', owner: 'thbrown' },
+    { name: 'data', type: 'folder', size: '-', modified: '2026-01-27', owner: 'thbrown' },
+    { name: 'analysis.ipynb', type: 'file', size: '1.2 MB', modified: '2026-02-01', owner: 'thbrown' },
+    { name: 'plot.png', type: 'file', size: '2.4 MB', modified: '2026-02-01', owner: 'thbrown' },
+  ],
+  "VLASS": [
+    { name: 'mosaics', type: 'folder', size: '-', modified: '2026-01-15', owner: 'group:VLASS' },
+    { name: 'raw_data', type: 'folder', size: '-', modified: '2025-12-10', owner: 'group:VLASS' },
+    { name: 'README.md', type: 'file', size: '4 KB', modified: '2025-11-05', owner: 'admin' },
+  ],
+  "ALMA-Large-Program": [
+    { name: 'cycle_8', type: 'folder', size: '-', modified: '2026-01-20', owner: 'group:ALMA' },
+    { name: 'calibrated', type: 'folder', size: '-', modified: '2026-01-22', owner: 'group:ALMA' },
+  ],
+  "CIRADA": [
+    { name: 'cutouts', type: 'folder', size: '-', modified: '2026-01-05', owner: 'system' },
+  ]
+
 }
 
 // Active sessions
@@ -44,8 +74,12 @@ export const activeSessions = [
     status: 'running' as const,
     startedAt: '2h ago',
     cpu: 2,
+    gpu: 15,
     ram: 8,
-    project: 'VLASS',
+    project: "VLASS",
+    nodeId: "node-04",
+    network: { in: 45.2, out: 12.5 }, // MB/s
+    scratch: { used: 12.5, quota: 100 }, // GB
   },
   {
     id: 'sess-002',
@@ -54,8 +88,12 @@ export const activeSessions = [
     status: 'running' as const,
     startedAt: '45m ago',
     cpu: 4,
+    gpu: 65,
     ram: 16,
-    project: 'ALMA',
+    project: "ALMA",
+    nodeId: "node-02",
+    network: { in: 120.5, out: 85.0 }, // MB/s
+    scratch: { used: 45.0, quota: 100 }, // GB
   },
   {
     id: 'sess-003',
@@ -64,8 +102,12 @@ export const activeSessions = [
     status: 'running' as const,
     startedAt: '3h ago',
     cpu: 2,
+    gpu: 0,
     ram: 4,
-    project: 'HST',
+    project: "HST",
+    nodeId: "node-04",
+    network: { in: 5.2, out: 2.1 }, // MB/s
+    scratch: { used: 8.5, quota: 50 }, // GB
   },
 ]
 
@@ -245,6 +287,15 @@ export const recentJobs = [
     startedAt: '2026-01-27 14:30',
     completedAt: '2026-01-27 18:45',
     cpuHours: 16.5,
+    command: "canfar-batch-process --project VLASS --mode mosaic --input /data/raw/*.fits",
+    logs: `[14:30:01] INFO: Starting VLASS Mosaic Generation
+[14:30:05] INFO: Loaded configuration from batch.conf
+[14:30:15] INFO: Found 245 input files in /data/raw/
+[14:31:00] INFO: Processing block 1/16...
+[15:45:22] INFO: Processing block 8/16...
+[17:10:45] INFO: Processing block 16/16...
+[18:44:50] INFO: Merging final outputs...
+[18:45:00] SUCCESS: Mosaic generation complete. Output saved to /data/processed/vlass_mosaic_001.fits`,
   },
   {
     id: 'job-002',
@@ -253,6 +304,21 @@ export const recentJobs = [
     startedAt: '2026-01-28 09:00',
     completedAt: null,
     cpuHours: 4.2,
+    command: "python scripts/analyze_spectra.py --target NGC4532 --lines CO,HCN",
+    resources: {
+      cpu: 45, // %
+      gpu: 12, // %
+      ram: 12, // GB
+      scratch: { used: 8.5, quota: 50 }, // GB
+      network: { in: 15.2, out: 5.5 } // MB/s
+    },
+    logs: `[09:00:01] INFO: Initializing spectral analysis environment
+[09:00:05] INFO: Loading spectral cubes for NGC4532
+[09:00:25] INFO: Cube dimensions: 1024x1024x512
+[09:01:00] INFO: Masking continuum...
+[09:15:30] INFO: Fitting Gaussian profiles...
+[09:45:10] PROGRESS: 35% complete
+[10:15:00] PROGRESS: 60% complete...`,
   },
   {
     id: 'job-003',
@@ -261,6 +327,18 @@ export const recentJobs = [
     startedAt: null,
     completedAt: null,
     cpuHours: 0,
+    command: "pipeline-runner --config calib_v2.json --dataset obs_2026_01_25",
+    logs: "",
+  },
+  {
+    id: "job-004",
+    name: "Dark Matter Simulation",
+    status: "paused" as any,
+    startedAt: "2026-01-28 10:30",
+    completedAt: null,
+    cpuHours: 2.5,
+    command: "nbody-sim --params config/dm_0.1.json",
+    logs: "[10:30:00] INFO: Initializing particles...\n[10:45:00] INFO: Computation paused by user.",
   },
 ]
 
@@ -668,4 +746,5 @@ export const jobPerformanceMetrics = {
     { label: '22:00', value: 8 },
     { label: '23:00', value: 12 },
   ],
+
 }

@@ -1,5 +1,6 @@
 export { GreetingCard } from './greeting-card'
-export { ComputeResourceCard, StorageResourceCard } from './resource-gauge'
+export { StorageResourceCard } from './resource-gauge'
+export { SessionResourceMonitor } from './session-resource-monitor'
 export { ActiveSessions } from './active-sessions'
 export { QuickActions } from './quick-actions'
 export { ResourceHistory } from './resource-history'
