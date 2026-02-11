@@ -11,7 +11,6 @@ import {
   Radar,
   Rocket,
   ChevronRight,
-  ChevronDown,
   Info,
   Loader2,
   CheckCircle2,
@@ -20,153 +19,404 @@ import {
   Cpu,
   HardDrive,
   Zap,
+  AlertCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { sessionTypes, containerImages, quickLaunchTemplates } from '@/lib/dummy-data'
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface SessionLauncherProps {
   open: boolean
   onClose: () => void
+  onSessionCreated?: (sessionId: string) => void
 }
 
 type TabType = 'quick' | 'custom'
-type LaunchState = 'idle' | 'launching' | 'success' | 'error'
+type LaunchState = 'idle' | 'validating' | 'launching' | 'success' | 'error'
 
-// Icon mapping
-const iconMap: Record<string, React.ReactNode> = {
-  BookOpen: <BookOpen className="h-6 w-6" />,
-  Radio: <Radio className="h-6 w-6" />,
-  Monitor: <Monitor className="h-6 w-6" />,
-  Flame: <Flame className="h-6 w-6" />,
-  Users: <Users className="h-6 w-6" />,
-  Radar: <Radar className="h-6 w-6" />,
+interface FormData {
+  kind: string
+  image: string
+  name: string
+  resourceMode: 'flexible' | 'fixed'
+  cpu: number
+  memory: number
+  gpu: number
+  envVars: Array<{ key: string; value: string; id: string }>
 }
 
-// Generate a random session name
+interface FormErrors {
+  kind?: string
+  image?: string
+  name?: string
+  cpu?: string
+  memory?: string
+  gpu?: string
+  envVars?: string
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const ICON_MAP: Record<string, React.ReactNode> = {
+  BookOpen: <BookOpen className="h-6 w-6" aria-hidden="true" />,
+  Radio: <Radio className="h-6 w-6" aria-hidden="true" />,
+  Monitor: <Monitor className="h-6 w-6" aria-hidden="true" />,
+  Flame: <Flame className="h-6 w-6" aria-hidden="true" />,
+  Users: <Users className="h-6 w-6" aria-hidden="true" />,
+  Radar: <Radar className="h-6 w-6" aria-hidden="true" />,
+}
+
+const INITIAL_FORM_DATA: FormData = {
+  kind: 'notebook',
+  image: '',
+  name: '',
+  resourceMode: 'flexible',
+  cpu: 2,
+  memory: 8,
+  gpu: 0,
+  envVars: [],
+}
+
+const RESOURCE_LIMITS = {
+  cpu: { min: 1, max: 32 },
+  memory: { min: 1, max: 256 },
+  gpu: { min: 0, max: 8 },
+} as const
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
 function generateSessionName(kind: string): string {
   const suffix = Math.random().toString(36).substring(2, 6)
   return `${kind}-${suffix}`
 }
 
-export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
+function generateEnvVarId(): string {
+  return `env-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`
+}
+
+function validateForm(data: FormData, isCustomMode: boolean): FormErrors {
+  const errors: FormErrors = {}
+
+  if (isCustomMode) {
+    if (!data.kind) {
+      errors.kind = 'Session type is required'
+    }
+
+    if (!data.image) {
+      errors.image = 'Container image is required'
+    } else if (!isValidImageUrl(data.image)) {
+      errors.image = 'Invalid container image format'
+    }
+
+    if (data.name && !/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/.test(data.name)) {
+      errors.name = 'Name must be lowercase alphanumeric with optional hyphens'
+    }
+
+    if (data.resourceMode === 'fixed') {
+      if (data.cpu < RESOURCE_LIMITS.cpu.min || data.cpu > RESOURCE_LIMITS.cpu.max) {
+        errors.cpu = `CPU must be between ${RESOURCE_LIMITS.cpu.min} and ${RESOURCE_LIMITS.cpu.max}`
+      }
+      if (data.memory < RESOURCE_LIMITS.memory.min || data.memory > RESOURCE_LIMITS.memory.max) {
+        errors.memory = `Memory must be between ${RESOURCE_LIMITS.memory.min} and ${RESOURCE_LIMITS.memory.max} GB`
+      }
+      if (data.gpu < RESOURCE_LIMITS.gpu.min || data.gpu > RESOURCE_LIMITS.gpu.max) {
+        errors.gpu = `GPU must be between ${RESOURCE_LIMITS.gpu.min} and ${RESOURCE_LIMITS.gpu.max}`
+      }
+    }
+
+    // Validate environment variables
+    const envVarKeys = new Set<string>()
+    for (const env of data.envVars) {
+      if (env.key && !/^[A-Z_][A-Z0-9_]*$/.test(env.key)) {
+        errors.envVars = 'Environment variable keys must be uppercase with underscores'
+        break
+      }
+      if (env.key && envVarKeys.has(env.key)) {
+        errors.envVars = 'Duplicate environment variable keys are not allowed'
+        break
+      }
+      if (env.key) envVarKeys.add(env.key)
+    }
+  }
+
+  return errors
+}
+
+function isValidImageUrl(image: string): boolean {
+  // Basic validation for container image format
+  const imagePattern = /^[a-z0-9][a-z0-9._/-]*:[a-z0-9._-]+$/i
+  return imagePattern.test(image)
+}
+
+function buildCliCommand(data: FormData): string {
+  const parts = ['canfar create']
+
+  if (data.name) parts.push(`--name ${data.name}`)
+  if (data.resourceMode === 'fixed') {
+    parts.push(`--cpu ${data.cpu}`)
+    parts.push(`--memory ${data.memory}`)
+  }
+  if (data.gpu > 0) parts.push(`--gpu ${data.gpu}`)
+
+  data.envVars.filter(e => e.key && e.value).forEach(e => parts.push(`--env ${e.key}=${e.value}`))
+
+  parts.push(data.kind)
+  parts.push(data.image || '<image>')
+
+  return parts.join(' ')
+}
+
+// ============================================================================
+// Custom Hooks
+// ============================================================================
+
+function useSessionForm(initialData: FormData = INITIAL_FORM_DATA) {
+  const [formData, setFormData] = React.useState<FormData>(initialData)
+  const [errors, setErrors] = React.useState<FormErrors>({})
+  const [touched, setTouched] = React.useState<Set<string>>(new Set())
+
+  const updateField = React.useCallback(
+    <K extends keyof FormData>(field: K, value: FormData[K]) => {
+      setFormData(prev => ({ ...prev, [field]: value }))
+      setTouched(prev => new Set(prev).add(field))
+    },
+    []
+  )
+
+  const addEnvVar = React.useCallback(() => {
+    setFormData(prev => ({
+      ...prev,
+      envVars: [...prev.envVars, { key: '', value: '', id: generateEnvVarId() }],
+    }))
+  }, [])
+
+  const removeEnvVar = React.useCallback((id: string) => {
+    setFormData(prev => ({
+      ...prev,
+      envVars: prev.envVars.filter(env => env.id !== id),
+    }))
+  }, [])
+
+  const updateEnvVar = React.useCallback((id: string, field: 'key' | 'value', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      envVars: prev.envVars.map(env => (env.id === id ? { ...env, [field]: value } : env)),
+    }))
+  }, [])
+
+  const reset = React.useCallback(() => {
+    setFormData({
+      ...INITIAL_FORM_DATA,
+      name: generateSessionName('notebook'),
+    })
+    setErrors({})
+    setTouched(new Set())
+  }, [])
+
+  const validate = React.useCallback(
+    (isCustomMode: boolean): boolean => {
+      const newErrors = validateForm(formData, isCustomMode)
+      setErrors(newErrors)
+      return Object.keys(newErrors).length === 0
+    },
+    [formData]
+  )
+
+  return {
+    formData,
+    errors,
+    touched,
+    updateField,
+    addEnvVar,
+    removeEnvVar,
+    updateEnvVar,
+    reset,
+    validate,
+    setFormData,
+  }
+}
+
+// ============================================================================
+// Main Component
+// ============================================================================
+
+export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLauncherProps) {
   const [activeTab, setActiveTab] = React.useState<TabType>('quick')
   const [launchState, setLaunchState] = React.useState<LaunchState>('idle')
   const [launchedSessionId, setLaunchedSessionId] = React.useState<string | null>(null)
-
-  // Quick launch selection
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
   const [selectedTemplate, setSelectedTemplate] = React.useState<string | null>(null)
 
-  // Custom session form state (matching CANFAR CLI parameters)
-  const [formData, setFormData] = React.useState({
-    kind: 'notebook',
-    image: '',
-    name: generateSessionName('notebook'),
-    resourceMode: 'flexible' as 'flexible' | 'fixed',
-    cpu: 2,
-    memory: 8,
-    gpu: 0,
-    envVars: [] as { key: string; value: string }[],
-  })
+  const form = useSessionForm()
+  const modalRef = React.useRef<HTMLDivElement>(null)
+  const previousActiveElement = React.useRef<HTMLElement | null>(null)
 
-  // Update session name when kind changes
+  // Extract stable references for effects
+  const { updateField, reset: formReset } = form
+  const { kind } = form.formData
+
+  // Generate session name when kind changes
   React.useEffect(() => {
-    if (formData.name.startsWith(formData.kind.split('-')[0]) === false) {
-      setFormData(prev => ({ ...prev, name: generateSessionName(prev.kind) }))
+    if (activeTab === 'custom') {
+      updateField('name', generateSessionName(kind))
     }
-  }, [formData.kind, formData.name])
+  }, [kind, activeTab, updateField])
 
   // Reset image when kind changes
   React.useEffect(() => {
-    setFormData(prev => ({ ...prev, image: '' }))
-  }, [formData.kind])
+    if (activeTab === 'custom') {
+      updateField('image', '')
+    }
+  }, [kind, activeTab, updateField])
 
-  const handleReset = () => {
-    setSelectedTemplate(null)
+  // Focus trap and accessibility
+  React.useEffect(() => {
+    if (open) {
+      previousActiveElement.current = document.activeElement as HTMLElement
+      modalRef.current?.focus()
+    } else {
+      previousActiveElement.current?.focus()
+    }
+  }, [open])
+
+  const handleClose = React.useCallback(() => {
+    if (launchState === 'launching') return
+
+    setActiveTab('quick')
     setLaunchState('idle')
     setLaunchedSessionId(null)
-    setFormData({
-      kind: 'notebook',
-      image: '',
-      name: generateSessionName('notebook'),
-      resourceMode: 'flexible',
-      cpu: 2,
-      memory: 8,
-      gpu: 0,
-      envVars: [],
-    })
-  }
-
-  const handleClose = () => {
-    handleReset()
+    setErrorMessage(null)
+    setSelectedTemplate(null)
+    formReset()
     onClose()
-  }
+  }, [launchState, onClose, formReset])
 
-  const handleLaunch = async () => {
-    setLaunchState('launching')
+  // Keyboard event handler for escape key
+  React.useEffect(() => {
+    if (!open) return
 
-    // Build the CLI-equivalent command for logging
-    let cliCommand = 'canfar create'
-
-    if (activeTab === 'quick' && selectedTemplate) {
-      const template = quickLaunchTemplates.find(t => t.id === selectedTemplate)
-      if (template) {
-        cliCommand += ` ${template.kind} ${template.image}`
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && launchState === 'idle') {
+        handleClose()
       }
-    } else {
-      // Custom session
-      if (formData.name) cliCommand += ` --name ${formData.name}`
-      if (formData.resourceMode === 'fixed') {
-        cliCommand += ` --cpu ${formData.cpu} --memory ${formData.memory}`
-      }
-      if (formData.gpu > 0) cliCommand += ` --gpu ${formData.gpu}`
-      formData.envVars.forEach(env => {
-        if (env.key && env.value) cliCommand += ` --env ${env.key}=${env.value}`
-      })
-      cliCommand += ` ${formData.kind} ${formData.image}`
     }
 
-    console.log('CLI equivalent:', cliCommand)
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, launchState, handleClose])
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
+  const handleLaunch = React.useCallback(async () => {
+    setErrorMessage(null)
 
-    // Simulate success
-    const sessionId = `sess-${Math.random().toString(36).substring(2, 8)}`
-    setLaunchedSessionId(sessionId)
-    setLaunchState('success')
-  }
+    // Validate based on mode
+    if (activeTab === 'custom' && !form.validate(true)) {
+      return
+    }
 
-  const canLaunch = activeTab === 'quick'
-    ? selectedTemplate !== null
-    : formData.kind && formData.image
+    if (activeTab === 'quick' && !selectedTemplate) {
+      setErrorMessage('Please select a session template')
+      return
+    }
+
+    setLaunchState('launching')
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000))
+
+      // Simulate occasional errors for demo
+      if (Math.random() < 0.1) {
+        throw new Error('Failed to connect to cluster. Please try again.')
+      }
+
+      const sessionId = `sess-${Math.random().toString(36).substring(2, 8)}`
+      setLaunchedSessionId(sessionId)
+      setLaunchState('success')
+      onSessionCreated?.(sessionId)
+
+      // Log CLI equivalent for debugging (intentional development logging)
+      if (process.env.NODE_ENV === 'development') {
+        if (activeTab === 'quick' && selectedTemplate) {
+          const template = quickLaunchTemplates.find(t => t.id === selectedTemplate)
+          if (template) {
+            // eslint-disable-next-line no-console
+            console.info('CLI equivalent:', `canfar create ${template.kind} ${template.image}`)
+          }
+        } else {
+          // eslint-disable-next-line no-console
+          console.info('CLI equivalent:', buildCliCommand(form.formData))
+        }
+      }
+    } catch (error) {
+      setLaunchState('error')
+      setErrorMessage(error instanceof Error ? error.message : 'An unexpected error occurred')
+    }
+  }, [activeTab, selectedTemplate, form, onSessionCreated])
+
+  const canLaunch =
+    activeTab === 'quick' ? selectedTemplate !== null : form.formData.kind && form.formData.image
 
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="session-launcher-title"
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={launchState === 'idle' ? handleClose : undefined}
+        aria-hidden="true"
       />
 
       {/* Modal */}
-      <div className="relative z-10 w-full max-w-2xl animate-fade-in rounded-2xl bg-white shadow-2xl">
-        {/* Success state */}
+      <div
+        ref={modalRef}
+        className="relative z-10 w-full max-w-2xl animate-fade-in rounded-2xl bg-white shadow-2xl focus:outline-none"
+        tabIndex={-1}
+      >
+        {/* Error State */}
+        {launchState === 'error' && (
+          <div className="p-8 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="h-8 w-8 text-red-600" aria-hidden="true" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900">Launch Failed</h2>
+            <p className="mt-2 text-gray-500">{errorMessage}</p>
+            <div className="mt-6 flex justify-center gap-3">
+              <Button variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button variant="primary" onClick={() => setLaunchState('idle')}>
+                Try Again
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Success State */}
         {launchState === 'success' && (
           <div className="p-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <CheckCircle2 className="h-8 w-8 text-green-600" />
+              <CheckCircle2 className="h-8 w-8 text-green-600" aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-semibold text-secondary">Session Launched!</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Session Launched!</h2>
             <p className="mt-2 text-gray-500">
               Your session is starting up. It will be ready in a few moments.
             </p>
-            <p className="mt-1 font-mono text-sm text-gray-400">
-              ID: {launchedSessionId}
-            </p>
+            <p className="mt-1 font-mono text-sm text-gray-400">ID: {launchedSessionId}</p>
             <div className="mt-6 flex justify-center gap-3">
               <Button variant="secondary" onClick={handleClose}>
                 Close
@@ -178,48 +428,54 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
           </div>
         )}
 
-        {/* Launching state */}
+        {/* Launching State */}
         {launchState === 'launching' && (
           <div className="p-8 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
-              <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-semibold text-secondary">Launching Session...</h2>
-            <p className="mt-2 text-gray-500">
-              Creating your session on the platform
+            <h2 className="text-xl font-semibold text-gray-900">Launching Session...</h2>
+            <p className="mt-2 text-gray-500">Creating your session on the platform</p>
+            <p className="sr-only" role="status" aria-live="polite">
+              Session launch in progress
             </p>
           </div>
         )}
 
-        {/* Normal state */}
+        {/* Idle State - Main Form */}
         {launchState === 'idle' && (
           <>
             {/* Header */}
             <div className="flex items-center justify-between border-b px-6 py-4">
               <div>
-                <h2 className="text-xl font-semibold text-secondary">New Session</h2>
+                <h2 id="session-launcher-title" className="text-xl font-semibold text-gray-900">
+                  New Session
+                </h2>
                 <p className="text-sm text-gray-500">
                   Launch an interactive session on the Science Platform
                 </p>
               </div>
               <button
                 onClick={handleClose}
-                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Close dialog"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
 
             {/* Tabs */}
-            <div className="border-b px-6">
+            <div className="border-b px-6" role="tablist" aria-label="Session configuration mode">
               <div className="flex gap-1">
                 <button
+                  role="tab"
+                  aria-selected={activeTab === 'quick'}
+                  aria-controls="quick-panel"
+                  id="quick-tab"
                   onClick={() => setActiveTab('quick')}
                   className={cn(
-                    'relative px-4 py-3 text-sm font-medium transition-colors',
-                    activeTab === 'quick'
-                      ? 'text-primary'
-                      : 'text-gray-500 hover:text-gray-700'
+                    'relative px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+                    activeTab === 'quick' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
                   )}
                 >
                   Quick Launch
@@ -228,12 +484,14 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
                   )}
                 </button>
                 <button
+                  role="tab"
+                  aria-selected={activeTab === 'custom'}
+                  aria-controls="custom-panel"
+                  id="custom-tab"
                   onClick={() => setActiveTab('custom')}
                   className={cn(
-                    'relative px-4 py-3 text-sm font-medium transition-colors',
-                    activeTab === 'custom'
-                      ? 'text-primary'
-                      : 'text-gray-500 hover:text-gray-700'
+                    'relative px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
+                    activeTab === 'custom' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
                   )}
                 >
                   Custom Configuration
@@ -247,18 +505,25 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
             {/* Content */}
             <div className="max-h-[60vh] overflow-y-auto p-6">
               {activeTab === 'quick' ? (
-                <QuickLaunchMode
+                <QuickLaunchPanel
                   selectedTemplate={selectedTemplate}
                   onSelectTemplate={setSelectedTemplate}
                 />
               ) : (
-                <CustomConfigMode formData={formData} setFormData={setFormData} />
+                <CustomConfigPanel
+                  formData={form.formData}
+                  errors={form.errors}
+                  onUpdateField={form.updateField}
+                  onAddEnvVar={form.addEnvVar}
+                  onRemoveEnvVar={form.removeEnvVar}
+                  onUpdateEnvVar={form.updateEnvVar}
+                />
               )}
             </div>
 
             {/* Footer */}
             <div className="flex items-center justify-between border-t px-6 py-4">
-              <Button variant="ghost" onClick={handleReset}>
+              <Button variant="ghost" onClick={form.reset}>
                 Reset
               </Button>
               <div className="flex gap-3">
@@ -269,11 +534,19 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
                   variant="primary"
                   onClick={handleLaunch}
                   disabled={!canLaunch}
+                  aria-describedby={!canLaunch ? 'launch-requirements' : undefined}
                 >
-                  <Rocket className="mr-2 h-4 w-4" />
+                  <Rocket className="mr-2 h-4 w-4" aria-hidden="true" />
                   Launch Session
                 </Button>
               </div>
+              {!canLaunch && (
+                <span id="launch-requirements" className="sr-only">
+                  {activeTab === 'quick'
+                    ? 'Select a template to launch'
+                    : 'Fill in required fields to launch'}
+                </span>
+              )}
             </div>
           </>
         )}
@@ -282,36 +555,37 @@ export function SessionLauncher({ open, onClose }: SessionLauncherProps) {
   )
 }
 
-// Quick launch mode - pre-configured templates
-function QuickLaunchMode({
-  selectedTemplate,
-  onSelectTemplate,
-}: {
+// ============================================================================
+// Sub-components
+// ============================================================================
+
+interface QuickLaunchPanelProps {
   selectedTemplate: string | null
   onSelectTemplate: (id: string) => void
-}) {
+}
+
+function QuickLaunchPanel({ selectedTemplate, onSelectTemplate }: QuickLaunchPanelProps) {
   return (
-    <div className="space-y-4">
+    <div role="tabpanel" id="quick-panel" aria-labelledby="quick-tab" className="space-y-4">
       <p className="text-sm text-gray-500">
         Choose a pre-configured session template for quick launch with default settings.
       </p>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {quickLaunchTemplates.map((template) => (
+      <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label="Session templates">
+        {quickLaunchTemplates.map(template => (
           <button
             key={template.id}
+            role="radio"
+            aria-checked={selectedTemplate === template.id}
             onClick={() => onSelectTemplate(template.id)}
             className={cn(
-              'group relative rounded-xl border-2 p-4 text-left transition-all',
+              'group relative rounded-xl border-2 p-4 text-left transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
               selectedTemplate === template.id
                 ? 'border-primary bg-primary-light'
                 : 'border-gray-100 bg-gray-50/50 hover:border-gray-200 hover:bg-gray-50'
             )}
           >
             {template.popular && (
-              <Badge
-                variant="warning"
-                className="absolute -top-2 right-3 bg-accent text-white"
-              >
+              <Badge variant="warning" className="absolute -top-2 right-3 bg-accent text-white">
                 Popular
               </Badge>
             )}
@@ -324,10 +598,10 @@ function QuickLaunchMode({
                   : 'bg-white text-gray-500 group-hover:text-primary'
               )}
             >
-              {iconMap[template.icon]}
+              {ICON_MAP[template.icon]}
             </div>
 
-            <h3 className="mt-3 font-semibold text-secondary">{template.name}</h3>
+            <h3 className="mt-3 font-semibold text-gray-900">{template.name}</h3>
             <p className="mt-1 text-sm text-gray-500">{template.description}</p>
 
             <div className="mt-3 flex items-center gap-2">
@@ -339,7 +613,7 @@ function QuickLaunchMode({
             {selectedTemplate === template.id && (
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white">
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-4 w-4" aria-hidden="true" />
                 </div>
               </div>
             )}
@@ -350,63 +624,43 @@ function QuickLaunchMode({
   )
 }
 
-// Custom configuration mode - full CLI parameters
-function CustomConfigMode({
+interface CustomConfigPanelProps {
+  formData: FormData
+  errors: FormErrors
+  onUpdateField: <K extends keyof FormData>(field: K, value: FormData[K]) => void
+  onAddEnvVar: () => void
+  onRemoveEnvVar: (id: string) => void
+  onUpdateEnvVar: (id: string, field: 'key' | 'value', value: string) => void
+}
+
+function CustomConfigPanel({
   formData,
-  setFormData,
-}: {
-  formData: {
-    kind: string
-    image: string
-    name: string
-    resourceMode: 'flexible' | 'fixed'
-    cpu: number
-    memory: number
-    gpu: number
-    envVars: { key: string; value: string }[]
-  }
-  setFormData: React.Dispatch<React.SetStateAction<typeof formData>>
-}) {
+  errors,
+  onUpdateField,
+  onAddEnvVar,
+  onRemoveEnvVar,
+  onUpdateEnvVar,
+}: CustomConfigPanelProps) {
   const availableImages = containerImages[formData.kind] || []
 
-  const addEnvVar = () => {
-    setFormData(prev => ({
-      ...prev,
-      envVars: [...prev.envVars, { key: '', value: '' }],
-    }))
-  }
-
-  const removeEnvVar = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      envVars: prev.envVars.filter((_, i) => i !== index),
-    }))
-  }
-
-  const updateEnvVar = (index: number, field: 'key' | 'value', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      envVars: prev.envVars.map((env, i) =>
-        i === index ? { ...env, [field]: value } : env
-      ),
-    }))
-  }
-
   return (
-    <div className="space-y-6">
-      {/* Session Type (KIND) */}
-      <div>
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+    <div role="tabpanel" id="custom-panel" aria-labelledby="custom-tab" className="space-y-6">
+      {/* Session Type */}
+      <fieldset>
+        <legend className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
           Session Type
-          <span className="text-xs font-normal text-gray-400">(required)</span>
-        </label>
-        <div className="grid grid-cols-5 gap-2">
-          {sessionTypes.map((type) => (
+          <span className="text-xs font-normal text-red-500">*</span>
+        </legend>
+        <div className="grid grid-cols-5 gap-2" role="radiogroup">
+          {sessionTypes.map(type => (
             <button
               key={type.id}
-              onClick={() => setFormData({ ...formData, kind: type.id })}
+              type="button"
+              role="radio"
+              aria-checked={formData.kind === type.id}
+              onClick={() => onUpdateField('kind', type.id)}
               className={cn(
-                'flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all',
+                'flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
                 formData.kind === type.id
                   ? 'border-primary bg-primary-light'
                   : 'border-gray-100 hover:border-gray-200'
@@ -415,12 +669,10 @@ function CustomConfigMode({
               <div
                 className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-lg',
-                  formData.kind === type.id
-                    ? 'text-primary'
-                    : 'text-gray-400'
+                  formData.kind === type.id ? 'text-primary' : 'text-gray-400'
                 )}
               >
-                {iconMap[type.icon]}
+                {ICON_MAP[type.icon]}
               </div>
               <span
                 className={cn(
@@ -433,17 +685,25 @@ function CustomConfigMode({
             </button>
           ))}
         </div>
-      </div>
+        {errors.kind && (
+          <p className="mt-1 text-sm text-red-600" role="alert">
+            {errors.kind}
+          </p>
+        )}
+      </fieldset>
 
-      {/* Container Image (IMAGE) */}
+      {/* Container Image */}
       <div>
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label
+          htmlFor="container-image"
+          className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+        >
           Container Image
-          <span className="text-xs font-normal text-gray-400">(required)</span>
+          <span className="text-xs font-normal text-red-500">*</span>
         </label>
         {availableImages.length > 0 ? (
-          <div className="space-y-2">
-            {availableImages.map((img) => (
+          <div className="space-y-2" role="radiogroup" aria-label="Available container images">
+            {availableImages.map(img => (
               <label
                 key={img.id}
                 className={cn(
@@ -458,16 +718,15 @@ function CustomConfigMode({
                   name="image"
                   value={img.id}
                   checked={formData.image === img.id}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  onChange={e => onUpdateField('image', e.target.value)}
                   className="sr-only"
                 />
                 <div
                   className={cn(
                     'h-4 w-4 rounded-full border-2 transition-colors',
-                    formData.image === img.id
-                      ? 'border-primary bg-primary'
-                      : 'border-gray-300'
+                    formData.image === img.id ? 'border-primary bg-primary' : 'border-gray-300'
                   )}
+                  aria-hidden="true"
                 >
                   {formData.image === img.id && (
                     <div className="h-full w-full scale-50 rounded-full bg-white" />
@@ -475,61 +734,82 @@ function CustomConfigMode({
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-secondary">{img.name}</span>
-                    <Badge variant="default" className="text-xs">{img.tag}</Badge>
+                    <span className="font-medium text-gray-900">{img.name}</span>
+                    <Badge variant="default" className="text-xs">
+                      {img.tag}
+                    </Badge>
                   </div>
-                  {img.description && (
-                    <p className="text-xs text-gray-500">{img.description}</p>
-                  )}
+                  {img.description && <p className="text-xs text-gray-500">{img.description}</p>}
                 </div>
               </label>
             ))}
-            {/* Custom image input */}
             <div className="mt-3 border-t pt-3">
-              <label className="mb-1.5 block text-xs text-gray-500">
+              <label htmlFor="custom-image" className="mb-1.5 block text-xs text-gray-500">
                 Or enter a custom image URL:
               </label>
               <input
+                id="custom-image"
                 type="text"
                 value={formData.image.startsWith('images.canfar.net') ? '' : formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                onChange={e => onUpdateField('image', e.target.value)}
                 placeholder="e.g., images.canfar.net/myproject/myimage:tag"
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                aria-describedby={errors.image ? 'image-error' : undefined}
               />
             </div>
           </div>
         ) : (
           <input
+            id="container-image"
             type="text"
             value={formData.image}
-            onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+            onChange={e => onUpdateField('image', e.target.value)}
             placeholder="Enter container image URL"
             className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            aria-describedby={errors.image ? 'image-error' : undefined}
           />
+        )}
+        {errors.image && (
+          <p id="image-error" className="mt-1 text-sm text-red-600" role="alert">
+            {errors.image}
+          </p>
         )}
       </div>
 
-      {/* Session Name (--name) */}
+      {/* Session Name */}
       <div>
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+        <label
+          htmlFor="session-name"
+          className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
+        >
           Session Name
           <span className="text-xs font-normal text-gray-400">(optional, auto-generated)</span>
         </label>
         <input
+          id="session-name"
           type="text"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={e => onUpdateField('name', e.target.value.toLowerCase())}
           placeholder="Enter session name"
           className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+          aria-describedby={errors.name ? 'name-error' : 'name-hint'}
         />
+        <p id="name-hint" className="mt-1 text-xs text-gray-400">
+          Lowercase alphanumeric characters and hyphens only
+        </p>
+        {errors.name && (
+          <p id="name-error" className="mt-1 text-sm text-red-600" role="alert">
+            {errors.name}
+          </p>
+        )}
       </div>
 
       {/* Resource Allocation */}
-      <div>
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
+      <fieldset>
+        <legend className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
           Resource Allocation
-        </label>
-        <div className="flex gap-3">
+        </legend>
+        <div className="flex gap-3" role="radiogroup">
           <label
             className={cn(
               'flex flex-1 cursor-pointer flex-col gap-1 rounded-lg border-2 p-4 transition-all',
@@ -543,11 +823,17 @@ function CustomConfigMode({
               name="resourceMode"
               value="flexible"
               checked={formData.resourceMode === 'flexible'}
-              onChange={() => setFormData({ ...formData, resourceMode: 'flexible' })}
+              onChange={() => onUpdateField('resourceMode', 'flexible')}
               className="sr-only"
             />
             <div className="flex items-center gap-2">
-              <Zap className={cn('h-5 w-5', formData.resourceMode === 'flexible' ? 'text-primary' : 'text-gray-400')} />
+              <Zap
+                className={cn(
+                  'h-5 w-5',
+                  formData.resourceMode === 'flexible' ? 'text-primary' : 'text-gray-400'
+                )}
+                aria-hidden="true"
+              />
               <span className="font-medium text-gray-700">Flexible</span>
             </div>
             <p className="text-xs text-gray-500">
@@ -568,83 +854,111 @@ function CustomConfigMode({
               name="resourceMode"
               value="fixed"
               checked={formData.resourceMode === 'fixed'}
-              onChange={() => setFormData({ ...formData, resourceMode: 'fixed' })}
+              onChange={() => onUpdateField('resourceMode', 'fixed')}
               className="sr-only"
             />
             <div className="flex items-center gap-2">
-              <Cpu className={cn('h-5 w-5', formData.resourceMode === 'fixed' ? 'text-primary' : 'text-gray-400')} />
+              <Cpu
+                className={cn(
+                  'h-5 w-5',
+                  formData.resourceMode === 'fixed' ? 'text-primary' : 'text-gray-400'
+                )}
+                aria-hidden="true"
+              />
               <span className="font-medium text-gray-700">Fixed</span>
             </div>
-            <p className="text-xs text-gray-500">
-              Guaranteed resources. Specify CPU, Memory, GPU.
-            </p>
+            <p className="text-xs text-gray-500">Guaranteed resources. Specify CPU, Memory, GPU.</p>
           </label>
         </div>
-      </div>
+      </fieldset>
 
-      {/* Fixed Resource Options (--cpu, --memory, --gpu) */}
+      {/* Fixed Resource Options */}
       {formData.resourceMode === 'fixed' && (
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
-              <Cpu className="h-4 w-4 text-gray-400" />
+            <label
+              htmlFor="cpu-cores"
+              className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              <Cpu className="h-4 w-4 text-gray-400" aria-hidden="true" />
               CPU Cores
             </label>
             <input
+              id="cpu-cores"
               type="number"
-              min={1}
-              max={32}
+              min={RESOURCE_LIMITS.cpu.min}
+              max={RESOURCE_LIMITS.cpu.max}
               value={formData.cpu}
-              onChange={(e) =>
-                setFormData({ ...formData, cpu: parseInt(e.target.value) || 1 })
-              }
+              onChange={e => onUpdateField('cpu', parseInt(e.target.value) || 1)}
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              aria-describedby={errors.cpu ? 'cpu-error' : undefined}
             />
+            {errors.cpu && (
+              <p id="cpu-error" className="mt-1 text-sm text-red-600" role="alert">
+                {errors.cpu}
+              </p>
+            )}
           </div>
           <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
-              <HardDrive className="h-4 w-4 text-gray-400" />
+            <label
+              htmlFor="memory-gb"
+              className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              <HardDrive className="h-4 w-4 text-gray-400" aria-hidden="true" />
               Memory (GB)
             </label>
             <input
+              id="memory-gb"
               type="number"
-              min={1}
-              max={256}
+              min={RESOURCE_LIMITS.memory.min}
+              max={RESOURCE_LIMITS.memory.max}
               value={formData.memory}
-              onChange={(e) =>
-                setFormData({ ...formData, memory: parseInt(e.target.value) || 1 })
-              }
+              onChange={e => onUpdateField('memory', parseInt(e.target.value) || 1)}
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              aria-describedby={errors.memory ? 'memory-error' : undefined}
             />
+            {errors.memory && (
+              <p id="memory-error" className="mt-1 text-sm text-red-600" role="alert">
+                {errors.memory}
+              </p>
+            )}
           </div>
           <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700">
-              <Zap className="h-4 w-4 text-gray-400" />
+            <label
+              htmlFor="gpu-count"
+              className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-gray-700"
+            >
+              <Zap className="h-4 w-4 text-gray-400" aria-hidden="true" />
               GPUs
             </label>
             <input
+              id="gpu-count"
               type="number"
-              min={0}
-              max={8}
+              min={RESOURCE_LIMITS.gpu.min}
+              max={RESOURCE_LIMITS.gpu.max}
               value={formData.gpu}
-              onChange={(e) =>
-                setFormData({ ...formData, gpu: parseInt(e.target.value) || 0 })
-              }
+              onChange={e => onUpdateField('gpu', parseInt(e.target.value) || 0)}
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+              aria-describedby={errors.gpu ? 'gpu-error' : undefined}
             />
+            {errors.gpu && (
+              <p id="gpu-error" className="mt-1 text-sm text-red-600" role="alert">
+                {errors.gpu}
+              </p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Environment Variables (--env) */}
+      {/* Environment Variables */}
       <div>
         <div className="mb-2 flex items-center justify-between">
           <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
             Environment Variables
             <span className="text-xs font-normal text-gray-400">(optional)</span>
           </label>
-          <Button variant="ghost" size="sm" onClick={addEnvVar}>
-            <Plus className="mr-1 h-3.5 w-3.5" />
+          <Button variant="ghost" size="sm" onClick={onAddEnvVar} type="button">
+            <Plus className="mr-1 h-3.5 w-3.5" aria-hidden="true" />
             Add Variable
           </Button>
         </div>
@@ -653,48 +967,52 @@ function CustomConfigMode({
             No environment variables defined
           </p>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2" role="list" aria-label="Environment variables">
             {formData.envVars.map((env, index) => (
-              <div key={index} className="flex gap-2">
+              <div key={env.id} className="flex gap-2" role="listitem">
                 <input
                   type="text"
                   value={env.key}
-                  onChange={(e) => updateEnvVar(index, 'key', e.target.value)}
+                  onChange={e => onUpdateEnvVar(env.id, 'key', e.target.value.toUpperCase())}
                   placeholder="KEY"
+                  aria-label={`Environment variable ${index + 1} key`}
                   className="w-1/3 rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
                 <input
                   type="text"
                   value={env.value}
-                  onChange={(e) => updateEnvVar(index, 'value', e.target.value)}
+                  onChange={e => onUpdateEnvVar(env.id, 'value', e.target.value)}
                   placeholder="value"
+                  aria-label={`Environment variable ${index + 1} value`}
                   className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                 />
                 <button
-                  onClick={() => removeEnvVar(index)}
-                  className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-destructive"
+                  type="button"
+                  onClick={() => onRemoveEnvVar(env.id)}
+                  className="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-red-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                  aria-label={`Remove environment variable ${index + 1}`}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
                 </button>
               </div>
             ))}
           </div>
+        )}
+        {errors.envVars && (
+          <p className="mt-1 text-sm text-red-600" role="alert">
+            {errors.envVars}
+          </p>
         )}
       </div>
 
       {/* CLI Preview */}
       <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
         <div className="mb-2 flex items-center gap-2 text-xs font-medium text-gray-500">
-          <Info className="h-3.5 w-3.5" />
+          <Info className="h-3.5 w-3.5" aria-hidden="true" />
           CLI Equivalent
         </div>
         <code className="block whitespace-pre-wrap break-all font-mono text-xs text-gray-700">
-          canfar create{formData.name ? ` --name ${formData.name}` : ''}
-          {formData.resourceMode === 'fixed' ? ` --cpu ${formData.cpu} --memory ${formData.memory}` : ''}
-          {formData.gpu > 0 ? ` --gpu ${formData.gpu}` : ''}
-          {formData.envVars.filter(e => e.key && e.value).map(e => ` --env ${e.key}=${e.value}`).join('')}
-          {` ${formData.kind}`}
-          {formData.image ? ` ${formData.image}` : ' <image>'}
+          {buildCliCommand(formData)}
         </code>
       </div>
     </div>

@@ -40,8 +40,9 @@ export function Header({ onMenuClick, sidebarCollapsed = false }: HeaderProps) {
         <button
           onClick={onMenuClick}
           className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 lg:hidden"
+          aria-label="Toggle mobile menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
 
         {/* Search */}
@@ -54,9 +55,9 @@ export function Header({ onMenuClick, sidebarCollapsed = false }: HeaderProps) {
                 : 'border-gray-700 hover:bg-gray-800'
             )}
           >
-            <Search className="h-4 w-4 text-gray-400" />
+            <Search className="h-4 w-4 text-gray-400" aria-hidden="true" />
             <input
-              type="text"
+              type="search"
               placeholder="Search datasets or commands..."
               className="w-64 bg-transparent text-sm text-gray-300 placeholder-gray-500 outline-none"
               onFocus={() => {
@@ -64,6 +65,7 @@ export function Header({ onMenuClick, sidebarCollapsed = false }: HeaderProps) {
                 setPaletteOpen(true)
               }}
               onBlur={() => setSearchFocused(false)}
+              aria-label="Search datasets or commands"
             />
             <kbd className="hidden rounded bg-gray-800 px-1.5 py-0.5 text-[10px] font-mono text-gray-500 md:block border border-gray-700 shadow-sm">
               ⌘K
@@ -75,21 +77,34 @@ export function Header({ onMenuClick, sidebarCollapsed = false }: HeaderProps) {
       {/* Right section */}
       <div className="flex items-center gap-2">
         {/* Notifications */}
-        <button className="relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent" />
+        <button
+          className="relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700"
+          aria-label="Notifications"
+        >
+          <Bell className="h-5 w-5" aria-hidden="true" />
+          <span
+            className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent"
+            aria-hidden="true"
+          />
+          <span className="sr-only">You have new notifications</span>
         </button>
 
         {/* User menu */}
-        <button className="flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-gray-100">
+        <button
+          className="flex items-center gap-2 rounded-lg p-2 transition-colors hover:bg-gray-100"
+          aria-label="User menu"
+          aria-haspopup="menu"
+        >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-white shadow-lg shadow-primary/20">
-            {userData.name.split(' ').pop()?.charAt(0).toUpperCase() || <User className="h-4 w-4" />}
+            {userData.name.split(' ').pop()?.charAt(0).toUpperCase() || (
+              <User className="h-4 w-4" aria-hidden="true" />
+            )}
           </div>
           <div className="hidden text-left md:block">
             <p className="text-sm font-medium text-gray-200">{userData.name}</p>
             <p className="text-[10px] text-gray-500 uppercase tracking-tight">{userData.email}</p>
           </div>
-          <ChevronDown className="hidden h-4 w-4 text-gray-600 md:block" />
+          <ChevronDown className="hidden h-4 w-4 text-gray-600 md:block" aria-hidden="true" />
         </button>
       </div>
     </header>

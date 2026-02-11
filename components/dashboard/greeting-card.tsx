@@ -21,9 +21,7 @@ export function GreetingCard() {
             <h1 className="text-2xl font-semibold text-white">
               {greeting}, {userData.name}
             </h1>
-            <p className="mt-1 text-sm text-white/70">
-              Welcome back to the CANFAR Science Portal
-            </p>
+            <p className="mt-1 text-sm text-white/70">Welcome back to the CANFAR Science Portal</p>
           </div>
 
           {/* System status */}
@@ -31,16 +29,12 @@ export function GreetingCard() {
             {systemStatus.overall === 'nominal' ? (
               <>
                 <CheckCircle2 className="h-4 w-4 text-green-400" />
-                <span className="text-sm font-medium text-white">
-                  System Nominal
-                </span>
+                <span className="text-sm font-medium text-white">System Nominal</span>
               </>
             ) : (
               <>
                 <Activity className="h-4 w-4 text-amber-400" />
-                <span className="text-sm font-medium text-white">
-                  Degraded Performance
-                </span>
+                <span className="text-sm font-medium text-white">Degraded Performance</span>
               </>
             )}
           </div>

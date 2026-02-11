@@ -33,15 +33,13 @@ export default function MetricsPage() {
         <div className="flex items-center gap-3">
           {/* Time range selector */}
           <div className="flex items-center gap-1 rounded-lg border bg-white p-1">
-            {['1h', '6h', '24h', '7d'].map((range) => (
+            {['1h', '6h', '24h', '7d'].map(range => (
               <button
                 key={range}
                 onClick={() => setTimeRange(range)}
                 className={cn(
                   'rounded-md px-3 py-1 text-sm font-medium transition-colors',
-                  timeRange === range
-                    ? 'bg-primary text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                  timeRange === range ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'
                 )}
               >
                 {range}
@@ -50,8 +48,13 @@ export default function MetricsPage() {
           </div>
 
           {/* Refresh button */}
+<<<<<<< HEAD
           <Button variant="secondary" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" />
+=======
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+>>>>>>> origin/main
             Refresh
           </Button>
         </div>
@@ -59,39 +62,45 @@ export default function MetricsPage() {
 
       {/* Last updated */}
       <div className="flex items-center gap-2 text-xs text-gray-500">
-        <Clock className="h-3 w-3" />
+        <Clock className="h-3 w-3" aria-hidden="true" />
         Last updated: {lastRefresh.toLocaleTimeString()}
-        <Badge variant="success" className="ml-2">Live</Badge>
+        <Badge variant="success" className="ml-2">
+          Live
+        </Badge>
       </div>
 
       {/* Tab navigation */}
-      <div className="border-b">
+      <div className="border-b" role="tablist" aria-label="Metrics categories">
         <div className="flex gap-1">
           <button
+            role="tab"
+            aria-selected={activeTab === 'platform'}
+            aria-controls="platform-panel"
+            id="platform-tab"
             onClick={() => setActiveTab('platform')}
             className={cn(
               'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-              activeTab === 'platform'
-                ? 'text-primary'
-                : 'text-gray-500 hover:text-gray-700'
+              activeTab === 'platform' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
             )}
           >
-            <Server className="h-4 w-4" />
+            <Server className="h-4 w-4" aria-hidden="true" />
             Platform Resources
             {activeTab === 'platform' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
             )}
           </button>
           <button
+            role="tab"
+            aria-selected={activeTab === 'jobs'}
+            aria-controls="jobs-panel"
+            id="jobs-tab"
             onClick={() => setActiveTab('jobs')}
             className={cn(
               'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-              activeTab === 'jobs'
-                ? 'text-primary'
-                : 'text-gray-500 hover:text-gray-700'
+              activeTab === 'jobs' ? 'text-primary' : 'text-gray-500 hover:text-gray-700'
             )}
           >
-            <Zap className="h-4 w-4" />
+            <Zap className="h-4 w-4" aria-hidden="true" />
             Job Performance
             {activeTab === 'jobs' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
@@ -101,11 +110,13 @@ export default function MetricsPage() {
       </div>
 
       {/* Content */}
-      {activeTab === 'platform' ? (
-        <PlatformMetrics />
-      ) : (
-        <JobPerformanceMetrics />
-      )}
+      <div
+        role="tabpanel"
+        id={activeTab === 'platform' ? 'platform-panel' : 'jobs-panel'}
+        aria-labelledby={activeTab === 'platform' ? 'platform-tab' : 'jobs-tab'}
+      >
+        {activeTab === 'platform' ? <PlatformMetrics /> : <JobPerformanceMetrics />}
+      </div>
     </div>
   )
 }
@@ -147,6 +158,7 @@ function PlatformMetrics() {
 
       {/* Charts row 1 - Global Performance */}
       <div className="grid gap-4 lg:grid-cols-2">
+<<<<<<< HEAD
         <GrafanaPanel title="Cluster CPU Saturation" subtitle="Aggregate utilization across all nodes">
           <LineChart
             data={platformMetrics.activeSessionsHistory.map(d => ({ ...d, value: Math.min(100, d.value * 1.5) }))}
@@ -163,6 +175,14 @@ function PlatformMetrics() {
             height={200}
             showArea
           />
+=======
+        <GrafanaPanel title="CPU Usage by Node" subtitle="Current utilization %">
+          <BarChart data={platformMetrics.nodesCpuUsage} color="#005493" horizontal />
+        </GrafanaPanel>
+
+        <GrafanaPanel title="Memory Usage by Node" subtitle="Current utilization %">
+          <BarChart data={platformMetrics.nodesMemoryUsage} color="#F5AA1C" horizontal />
+>>>>>>> origin/main
         </GrafanaPanel>
       </div>
 
@@ -178,12 +198,7 @@ function PlatformMetrics() {
         </GrafanaPanel>
 
         <GrafanaPanel title="Job Queue Depth" subtitle="Last 24 hours">
-          <LineChart
-            data={platformMetrics.jobQueueHistory}
-            color="#22c55e"
-            height={160}
-            showArea
-          />
+          <LineChart data={platformMetrics.jobQueueHistory} color="#22c55e" height={160} showArea />
         </GrafanaPanel>
       </div>
 
@@ -208,7 +223,11 @@ function PlatformMetrics() {
           </div>
         </GrafanaPanel>
 
+<<<<<<< HEAD
         <GrafanaPanel title="Storage I/O Decomposition" subtitle="Throughput by storage type (MB/s)">
+=======
+        <GrafanaPanel title="Storage I/O" subtitle="MB/s">
+>>>>>>> origin/main
           <div className="space-y-4">
             <LineChart
               data={platformMetrics.storageReadHistory}
@@ -276,11 +295,7 @@ function JobPerformanceMetrics() {
       {/* Charts row 1 */}
       <div className="grid gap-4 lg:grid-cols-2">
         <GrafanaPanel title="CPU Hours by Project" subtitle="Last 7 days">
-          <BarChart
-            data={jobPerformanceMetrics.cpuHoursByProject}
-            color="#005493"
-            horizontal
-          />
+          <BarChart data={jobPerformanceMetrics.cpuHoursByProject} color="#005493" horizontal />
         </GrafanaPanel>
 
         <GrafanaPanel title="Jobs Completed" subtitle="Last 24 hours">
@@ -351,7 +366,7 @@ function StatCard({
     <div className="rounded-xl border bg-white p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <div className={cn('rounded-lg p-2', colorClasses[color])}>
-          <Icon className="h-5 w-5" />
+          <Icon className="h-5 w-5" aria-hidden="true" />
         </div>
         <div>
           <p className="text-sm text-gray-500">{label}</p>

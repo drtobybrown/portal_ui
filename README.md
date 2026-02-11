@@ -22,23 +22,23 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Tech Stack
 
-| Technology | Purpose |
-|------------|---------|
-| [Next.js 14](https://nextjs.org/) | React framework with App Router |
-| [Tailwind CSS](https://tailwindcss.com/) | Utility-first styling |
-| [Lucide React](https://lucide.dev/) | Icon library |
-| [TypeScript](https://www.typescriptlang.org/) | Type safety |
+| Technology                                    | Purpose                         |
+| --------------------------------------------- | ------------------------------- |
+| [Next.js 14](https://nextjs.org/)             | React framework with App Router |
+| [Tailwind CSS](https://tailwindcss.com/)      | Utility-first styling           |
+| [Lucide React](https://lucide.dev/)           | Icon library                    |
+| [TypeScript](https://www.typescriptlang.org/) | Type safety                     |
 
 ## Design System
 
 ### Color Palette (UVic Brand)
 
-| Color | Hex | Usage |
-|-------|-----|-------|
+| Color        | Hex       | Usage                          |
+| ------------ | --------- | ------------------------------ |
 | Primary Blue | `#005493` | Primary buttons, active states |
-| Dark Blue | `#002754` | Sidebar, headings |
-| Gold/Yellow | `#F5AA1C` | Accents, warnings, highlights |
-| Red | `#C63527` | Errors, destructive actions |
+| Dark Blue    | `#002754` | Sidebar, headings              |
+| Gold/Yellow  | `#F5AA1C` | Accents, warnings, highlights  |
+| Red          | `#C63527` | Errors, destructive actions    |
 
 ### Typography
 
@@ -48,6 +48,7 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 ## Features
 
 ### Dashboard (`/`)
+
 - Personalized greeting with system status indicator
 - Resource overview with circular CPU/RAM gauges
 - Storage usage progress bars
@@ -56,33 +57,43 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 - Quick action buttons for common tasks
 
 ### Session Launcher
+
 - **Standard Mode:** Template cards for quick launch (Jupyter, CARTA, Desktop)
 - **Advanced Mode:** Full configuration with custom containers, resource allocation
 
 ### My Sessions (`/sessions`)
+
 - Grid view of all active sessions
 - Filter and search capabilities
 - Session management (connect, stop)
 
 ### Data & Storage (`/storage`)
+
 - VOSpace file browser
 - Storage quota visualization
 - File upload interface
 
 ### Batch Processing (`/batch`)
+
 - Job queue monitoring
 - Job submission interface
 - Status tracking with CPU hours
 
 ### Metrics (`/metrics`)
+
 - **Platform Resources Tab:** Node CPU/Memory usage, active sessions, network I/O
 - **Job Performance Tab:** Success rates, duration trends, queue wait times
 - Grafana-style panel layout with time range selector
 
 ### Settings (`/settings`)
+
 - Profile management
 - Notification preferences
 - (More sections coming soon)
+
+## Documentation
+
+- **[Architecture Summary](./ARCHITECTURE_SUMMARY.md)** — Technical architecture, data flow, extension points for developers and AI agents, and security review.
 
 ## Project Structure
 
@@ -127,6 +138,7 @@ npm run lint     # Run ESLint
 This is a **dummy UI prototype** with mock data. It demonstrates the proposed visual design and interaction patterns for the CANFAR Science Portal redesign.
 
 ### What's Implemented
+
 - [x] Global layout (collapsible sidebar, header with search)
 - [x] Dashboard with resource gauges and session list
 - [x] Session launcher modal (Standard/Advanced modes)
@@ -135,6 +147,7 @@ This is a **dummy UI prototype** with mock data. It demonstrates the proposed vi
 - [x] Responsive design
 
 ### What's Next
+
 - [ ] Connect to real CANFAR APIs
 - [ ] Authentication integration
 - [ ] Real-time session updates

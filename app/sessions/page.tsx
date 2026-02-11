@@ -1,8 +1,13 @@
 'use client'
 
 import * as React from 'react'
+<<<<<<< HEAD
 import { Monitor, Plus, Search, Filter, Cpu, Terminal, Clock, CheckCircle2, AlertCircle, Loader2, ChevronDown, ChevronUp, AlertTriangle, Pause, Play, Square, Activity, RefreshCw, Network, Database } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+=======
+import { Plus, Search, Filter } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+>>>>>>> origin/main
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -47,6 +52,7 @@ export default function SessionsPage() {
         setExpandedJob(expandedJob === id ? null : id)
     }
 
+<<<<<<< HEAD
     const toggleJobSelection = (id: string) => {
         const newSelected = new Set(selectedJobs)
         if (newSelected.has(id)) {
@@ -76,6 +82,22 @@ export default function SessionsPage() {
                     <p className="text-sm text-gray-500">
                         Manage your interactive sessions and batch processing jobs
                     </p>
+=======
+      {/* Sessions Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {activeSessions.map(session => (
+          <Card key={session.id} className="group">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'h-2.5 w-2.5 rounded-full',
+                      session.status === 'running' ? 'bg-green-500' : 'bg-gray-400'
+                    )}
+                  />
+                  <CardTitle className="text-base">{session.name}</CardTitle>
+>>>>>>> origin/main
                 </div>
                 <div className="flex gap-2">
                     <Button variant={activeTab === 'interactive' ? 'primary' : 'secondary'} onClick={() => setActiveTab('interactive')}>

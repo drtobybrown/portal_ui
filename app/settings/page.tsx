@@ -58,16 +58,14 @@ function SettingsContent() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-secondary">Settings</h1>
-        <p className="text-sm text-gray-500">
-          Manage your account and preferences
-        </p>
+        <p className="text-sm text-gray-500">Manage your account and preferences</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Navigation */}
         <div className="lg:col-span-1">
           <nav className="space-y-1">
-            {settingsSections.map((section) => {
+            {settingsSections.map(section => {
               const Icon = section.icon
               return (
                 <button
@@ -94,9 +92,7 @@ function SettingsContent() {
             <Card>
               <CardHeader>
                 <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your personal information and preferences
-                </CardDescription>
+                <CardDescription>Update your personal information and preferences</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-4">
@@ -207,17 +203,24 @@ function SettingsContent() {
             <Card>
               <CardHeader>
                 <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Choose how you want to be notified
-                </CardDescription>
+                <CardDescription>Choose how you want to be notified</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[
-                  { label: 'Job completion alerts', description: 'Get notified when batch jobs finish' },
-                  { label: 'Session expiry warnings', description: 'Alert before sessions time out' },
-                  { label: 'Storage quota alerts', description: 'Notify when approaching quota limits' },
+                  {
+                    label: 'Job completion alerts',
+                    description: 'Get notified when batch jobs finish',
+                  },
+                  {
+                    label: 'Session expiry warnings',
+                    description: 'Alert before sessions time out',
+                  },
+                  {
+                    label: 'Storage quota alerts',
+                    description: 'Notify when approaching quota limits',
+                  },
                   { label: 'System announcements', description: 'Important platform updates' },
-                ].map((item) => (
+                ].map(item => (
                   <div key={item.label} className="flex items-center justify-between py-2">
                     <div>
                       <p className="font-medium text-secondary">{item.label}</p>
@@ -233,22 +236,25 @@ function SettingsContent() {
             </Card>
           )}
 
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="rounded-full bg-gray-100 p-4">
-                {React.createElement(
-                  settingsSections.find((s) => s.id === activeSection)?.icon || User,
-                  { className: 'h-8 w-8 text-gray-400' }
-                )}
-              </div>
-              <h3 className="mt-4 font-semibold text-secondary">
-                {settingsSections.find((s) => s.id === activeSection)?.name}
-              </h3>
-              <p className="mt-1 text-sm text-gray-500">
-                This section is coming soon
-              </p>
-            </CardContent>
-          </Card>
+          {/* Fallback for unimplemented sections */}
+          {!['profile', 'security', 'notifications'].includes(activeSection) && (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="rounded-full bg-gray-100 p-4">
+                  {React.createElement(
+                    settingsSections.find((s) => s.id === activeSection)?.icon || User,
+                    { className: 'h-8 w-8 text-gray-400' }
+                  )}
+                </div>
+                <h3 className="mt-4 font-semibold text-secondary">
+                  {settingsSections.find((s) => s.id === activeSection)?.name}
+                </h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  This section is coming soon
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
