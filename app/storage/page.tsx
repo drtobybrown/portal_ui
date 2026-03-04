@@ -1,13 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { HardDrive, Upload, FolderOpen, File, MoreHorizontal, Database, Cloud, Users, Plus, ArrowUpRight, Download, Trash2, FileText, Image as ImageIcon, Film, Music } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { HardDrive, Upload, FolderOpen, Database, Cloud, ArrowUpRight, Download, Trash2, FileText, Image as ImageIcon, Film, Music } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { userStorage, mockFileSystem, userData } from '@/lib/dummy-data'
-import { formatPercentage, cn } from '@/lib/utils'
+import { cn } from '@/lib/utils'
 
 type StorageLocation = 'home' | string
 
@@ -22,13 +22,7 @@ const getFileIcon = (name: string, type: string) => {
 export default function StoragePage() {
     const [activeLocation, setActiveLocation] = React.useState<StorageLocation>('home')
 
-    // Find current storage quota info based on location
-    const currentStorage = activeLocation === 'home'
-        ? { ...userStorage.home, name: 'Home Storage', type: 'Personal' }
-        : userStorage.projects.find(p => p.name === activeLocation) || { ...userStorage.home, name: 'Unknown', type: '-' }
-
     const files = mockFileSystem[activeLocation as keyof typeof mockFileSystem] || []
-    const percentage = formatPercentage(currentStorage.used, currentStorage.quota)
 
     return (
         <div className="space-y-6 animate-fade-in">

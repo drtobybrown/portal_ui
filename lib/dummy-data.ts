@@ -333,7 +333,7 @@ export const recentJobs = [
   {
     id: "job-004",
     name: "Dark Matter Simulation",
-    status: "paused" as any,
+    status: 'paused' as const,
     startedAt: "2026-01-28 10:30",
     completedAt: null,
     cpuHours: 2.5,

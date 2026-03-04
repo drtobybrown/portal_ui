@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Monitor,
   HardDrive,
-  Cpu,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -37,7 +36,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-gray-950 transition-all duration-300 border-r border-gray-800',
+        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-secondary transition-all duration-300 border-r border-white/10',
         collapsed ? 'w-16' : 'w-60'
       )}
       role="navigation"

@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { Plus, Upload, ClipboardList, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 interface QuickActionsProps {
   onStartSession?: () => void

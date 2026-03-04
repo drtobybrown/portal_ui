@@ -2,9 +2,10 @@
 
 import * as React from 'react'
 import { Terminal, Hammer, Save, Play, History, Clock, ChevronRight, FileCode } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 export default function BuilderPage() {
     return (
@@ -48,13 +49,13 @@ export default function BuilderPage() {
                         </CardHeader>
                         <CardContent className="p-0">
                             <div className="relative">
-                                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-900 border-r border-gray-800 flex flex-col items-center py-4 text-[10px] font-mono text-gray-600 select-none">
+                                <div className="absolute left-0 top-0 bottom-0 w-12 bg-gray-100 border-r border-gray-200 flex flex-col items-center py-4 text-[10px] font-mono text-gray-500 select-none">
                                     {Array.from({ length: 15 }).map((_, i) => (
                                         <div key={i} className="h-6 leading-6">{i + 1}</div>
                                     ))}
                                 </div>
                                 <textarea
-                                    className="w-full h-[400px] pl-16 pr-4 py-4 text-xs font-mono bg-gray-900 text-green-400 outline-none focus:ring-0 resize-none leading-6"
+                                    className="w-full h-[400px] pl-16 pr-4 py-4 text-xs font-mono bg-white text-gray-800 outline-none focus:ring-0 resize-none leading-6 border-0"
                                     spellCheck={false}
                                     defaultValue={"FROM canfar/science-platform-base:latest\n\n# Install custom astronomical packages\nRUN pip install spectral-cube aplpy\n\n# Add your scripts\nCOPY analyze.py /home/user/analyze.py\n\n# Set permissions\nRUN chown -R 1000:1000 /home/user\n\nUSER 1000\nWORKDIR /home/user\n\nCMD [\"python\", \"/home/user/analyze.py\"]"}
                                 />
@@ -157,8 +158,4 @@ export default function BuilderPage() {
             </div>
         </div>
     )
-}
-
-function cn(...classes: any[]) {
-    return classes.filter(Boolean).join(' ')
 }

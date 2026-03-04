@@ -1,11 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Cpu, RefreshCw, Server, Activity, HardDrive } from 'lucide-react'
+import { RefreshCw, Server, Activity } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { activeSessions } from '@/lib/dummy-data'
-import { cn } from '@/lib/utils'
 
 export function SessionResourceMonitor() {
   // Group sessions by node for display

@@ -2,10 +2,9 @@
 
 import * as React from 'react'
 import { useSearchParams } from 'next/navigation'
-import { User, Bell, Shield, Palette, Key, Terminal, LogOut, Loader2 } from 'lucide-react'
+import { User, Bell, Shield, Palette, Key, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { userData } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 

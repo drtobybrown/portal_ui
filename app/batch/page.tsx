@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Cpu, Plus, Clock, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { Cpu, Plus, Clock, CheckCircle2, AlertCircle, Loader2, Pause } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +28,11 @@ const statusConfig = {
     icon: AlertCircle,
     color: 'text-red-500',
     badge: 'error' as const,
+  },
+  paused: {
+    icon: Pause,
+    color: 'text-gray-500',
+    badge: 'default' as const,
   },
 }
 
