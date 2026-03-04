@@ -3,7 +3,6 @@
 import * as React from 'react'
 import {
   GreetingCard,
-  ComputeResourceCard,
   StorageResourceCard,
   ActiveSessions,
   QuickActions,
@@ -33,7 +32,6 @@ export default function DashboardPage() {
           Resource Overview
         </h2>
         <div className="grid gap-6 lg:grid-cols-2">
-          <ComputeResourceCard />
           <StorageResourceCard />
         </div>
       </section>

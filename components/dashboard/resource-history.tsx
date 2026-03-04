@@ -4,7 +4,7 @@ import * as React from 'react'
 import { Activity, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart } from '@/components/ui/chart'
-import { cpuUsageHistory, ramUsageHistory } from '@/lib/dummy-data'
+import { cpuUsageHistory, ramUsageHistory, platformMetrics } from '@/lib/dummy-data'
 
 export function ResourceHistory() {
   return (
@@ -14,7 +14,7 @@ export function ResourceHistory() {
           <div className="rounded-lg bg-purple-100 p-2">
             <Activity className="h-4 w-4 text-purple-600" />
           </div>
-          <CardTitle className="text-base">Resource Usage (24h)</CardTitle>
+          <CardTitle className="text-base">Cluster Resource Usage (24h)</CardTitle>
         </div>
         <button className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600">
           <RefreshCw className="h-4 w-4" />
@@ -39,6 +39,26 @@ export function ResourceHistory() {
               height={130}
               label="Memory Usage"
               unit="%"
+              showArea
+            />
+          </div>
+          <div className="min-h-[160px]">
+            <LineChart
+              data={cpuUsageHistory.map(d => ({ ...d, value: d.value * 0.4 }))}
+              color="#22c55e"
+              height={130}
+              label="GPU Usage"
+              unit="%"
+              showArea
+            />
+          </div>
+          <div className="min-h-[160px]">
+            <LineChart
+              data={platformMetrics.networkInHistory}
+              color="#8b5cf6"
+              height={130}
+              label="Network Traffic"
+              unit=" MB/s"
               showArea
             />
           </div>

@@ -418,7 +418,7 @@ export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLaun
             </p>
             <p className="mt-1 font-mono text-sm text-gray-400">ID: {launchedSessionId}</p>
             <div className="mt-6 flex justify-center gap-3">
-              <Button variant="outline" onClick={handleClose}>
+              <Button variant="secondary" onClick={handleClose}>
                 Close
               </Button>
               <Button variant="primary" onClick={handleClose}>

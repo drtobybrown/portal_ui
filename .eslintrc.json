@@ -1,6 +1,10 @@
 {
   "extends": ["next/core-web-vitals", "next/typescript"],
   "rules": {
+<<<<<<< HEAD
+    "react/no-unescaped-entities": "off"
+  }
+=======
     "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "off",
@@ -11,4 +15,5 @@
     "no-console": ["warn", { "allow": ["warn", "error", "info"] }]
   },
   "ignorePatterns": ["node_modules/", ".next/", "out/"]
+>>>>>>> origin/main
 }

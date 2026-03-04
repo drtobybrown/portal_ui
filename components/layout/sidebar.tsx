@@ -12,15 +12,16 @@ import {
   ChevronLeft,
   ChevronRight,
   BarChart3,
+  Hammer,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CanfarLogo } from '@/components/ui/canfar-logo'
 
 const navigationItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'My Sessions', href: '/sessions', icon: Monitor },
+  { name: 'Sessions', href: '/sessions', icon: Monitor }, // Will now include batch
   { name: 'Data & Storage', href: '/storage', icon: HardDrive },
-  { name: 'Batch Processing', href: '/batch', icon: Cpu },
+  { name: 'Container Builder', href: '/builder', icon: Hammer },
   { name: 'Metrics', href: '/metrics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -36,7 +37,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-secondary transition-all duration-300',
+        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-gray-950 transition-all duration-300 border-r border-gray-800',
         collapsed ? 'w-16' : 'w-60'
       )}
       role="navigation"

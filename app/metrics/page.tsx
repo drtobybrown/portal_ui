@@ -48,8 +48,13 @@ export default function MetricsPage() {
           </div>
 
           {/* Refresh button */}
+<<<<<<< HEAD
+          <Button variant="secondary" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+=======
           <Button variant="outline" size="sm" onClick={handleRefresh}>
             <RefreshCw className="mr-2 h-4 w-4" aria-hidden="true" />
+>>>>>>> origin/main
             Refresh
           </Button>
         </div>
@@ -144,21 +149,40 @@ function PlatformMetrics() {
         />
         <StatCard
           icon={Network}
-          label="Network I/O"
+          label="Network (CANFAR to Wide Internet)"
           value="430 MB/s"
           subtext="avg throughput"
           color="green"
         />
       </div>
 
-      {/* Charts row 1 */}
+      {/* Charts row 1 - Global Performance */}
       <div className="grid gap-4 lg:grid-cols-2">
+<<<<<<< HEAD
+        <GrafanaPanel title="Cluster CPU Saturation" subtitle="Aggregate utilization across all nodes">
+          <LineChart
+            data={platformMetrics.activeSessionsHistory.map(d => ({ ...d, value: Math.min(100, d.value * 1.5) }))}
+            color="#005493"
+            height={200}
+            showArea
+          />
+        </GrafanaPanel>
+
+        <GrafanaPanel title="Total Aggregate Memory" subtitle="Global RAM usage across 12.2 PB pool">
+          <LineChart
+            data={platformMetrics.activeSessionsHistory.map(d => ({ ...d, value: Math.min(100, d.value * 1.2 + 10) }))}
+            color="#F5AA1C"
+            height={200}
+            showArea
+          />
+=======
         <GrafanaPanel title="CPU Usage by Node" subtitle="Current utilization %">
           <BarChart data={platformMetrics.nodesCpuUsage} color="#005493" horizontal />
         </GrafanaPanel>
 
         <GrafanaPanel title="Memory Usage by Node" subtitle="Current utilization %">
           <BarChart data={platformMetrics.nodesMemoryUsage} color="#F5AA1C" horizontal />
+>>>>>>> origin/main
         </GrafanaPanel>
       </div>
 
@@ -199,20 +223,31 @@ function PlatformMetrics() {
           </div>
         </GrafanaPanel>
 
+<<<<<<< HEAD
+        <GrafanaPanel title="Storage I/O Decomposition" subtitle="Throughput by storage type (MB/s)">
+=======
         <GrafanaPanel title="Storage I/O" subtitle="MB/s">
+>>>>>>> origin/main
           <div className="space-y-4">
             <LineChart
               data={platformMetrics.storageReadHistory}
-              color="#22c55e"
-              height={100}
-              label="Read"
+              color="#3b82f6"
+              height={80}
+              label="arc (home)"
               unit=" MB/s"
             />
             <LineChart
               data={platformMetrics.storageWriteHistory}
+              color="#22c55e"
+              height={80}
+              label="vault (vospace)"
+              unit=" MB/s"
+            />
+            <LineChart
+              data={platformMetrics.storageReadHistory.map(d => ({ ...d, value: d.value * 0.4 }))}
               color="#f59e0b"
-              height={100}
-              label="Write"
+              height={80}
+              label="Scratch (Ephemeral)"
               unit=" MB/s"
             />
           </div>
