@@ -40,7 +40,7 @@ export function QuickActions({ onStartSession }: QuickActionsProps) {
         </div>
         <h3 className="mt-4 text-lg font-semibold text-secondary">Transfer Data</h3>
         <p className="mt-1 text-sm text-gray-500">
-          Transfer files between computer and CANFAR Science Platform
+          Stage data from the SKA Science Archive to an SRC site
         </p>
         <div className="mt-4 flex items-center text-sm font-medium text-gray-600 group-hover:text-primary">
           Browse

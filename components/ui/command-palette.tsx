@@ -107,7 +107,7 @@ export function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
                     <div className="flex items-center gap-1.5">
                         <kbd className="rounded border border-gray-200 bg-white px-1.5 py-0.5 shadow-sm">ENTER</kbd> to select
                     </div>
-                    <div className="ml-auto text-primary opacity-50 font-bold tracking-tighter">CANFAR OS v0.9</div>
+                    <div className="ml-auto text-primary opacity-50 font-bold tracking-tighter">SRCNet Gateway v1.0</div>
                 </div>
             </div>
         </div>

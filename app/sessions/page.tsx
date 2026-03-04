@@ -488,7 +488,7 @@ export default function SessionsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <CardTitle>Global Cluster Queue</CardTitle>
-                                    <CardDescription>All pending and running jobs across the CANFAR cluster</CardDescription>
+                                    <CardDescription>All pending and running jobs across SRCNet compute sites</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Badge variant="secondary" className="bg-blue-100 text-blue-700">127 Jobs Total</Badge>

@@ -1,52 +1,63 @@
 import * as React from 'react'
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { Noto_Sans } from 'next/font/google'
 import './globals.css'
 import { LayoutProvider } from '@/components/layout/layout-provider'
 
-const inter = Inter({
+const notoSans = Noto_Sans({
   subsets: ['latin'],
   display: 'swap',
-  variable: '--font-inter',
+  variable: '--font-noto-sans',
+  weight: ['300', '400', '500', '600', '700'],
 })
 
 export const metadata: Metadata = {
   title: {
-    default: 'CANFAR Science Portal',
-    template: '%s | CANFAR Science Portal',
+    default: 'SRCNet Gateway',
+    template: '%s | SRCNet Gateway',
   },
   description:
-    'Cloud ecosystem for astronomy - Jupyter sessions, batch processing, and VOSpace storage',
-  keywords: ['CANFAR', 'astronomy', 'cloud computing', 'Jupyter', 'CARTA', 'science platform'],
-  authors: [{ name: 'Canadian Astronomy Data Centre' }],
-  creator: 'CANFAR',
-  publisher: 'Canadian Astronomy Data Centre',
+    'SKA Regional Centre Network Gateway — Data staging, compute sessions, and distributed science platform for SKA Observatory',
+  keywords: [
+    'SKA',
+    'SKAO',
+    'SRCNet',
+    'SRC',
+    'radio astronomy',
+    'science platform',
+    'data staging',
+    'Jupyter',
+    'CARTA',
+  ],
+  authors: [{ name: 'SKA Observatory' }],
+  creator: 'SKAO',
+  publisher: 'SKA Observatory',
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
     type: 'website',
-    locale: 'en_CA',
-    siteName: 'CANFAR Science Portal',
-    title: 'CANFAR Science Portal',
-    description: 'Cloud ecosystem for astronomy',
+    locale: 'en_GB',
+    siteName: 'SRCNet Gateway',
+    title: 'SRCNet Gateway',
+    description: 'SKA Regional Centre Network — Distributed science platform',
   },
 }
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#005493',
+  themeColor: '#070068',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en" className={notoSans.variable}>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className={`${inter.className} bg-gray-50 antialiased`}>
+      <body className={`${notoSans.className} bg-gray-50 antialiased`}>
         <LayoutProvider>{children}</LayoutProvider>
       </body>
     </html>

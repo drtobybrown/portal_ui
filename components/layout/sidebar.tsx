@@ -12,14 +12,20 @@ import {
   ChevronRight,
   BarChart3,
   Hammer,
+  Database,
+  Globe,
+  Terminal,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { CanfarLogo } from '@/components/ui/canfar-logo'
+import { SkaoLogo } from '@/components/ui/skao-logo'
 
 const navigationItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Sessions', href: '/sessions', icon: Monitor }, // Will now include batch
+  { name: 'Data Archive', href: '/archive', icon: Database },
+  { name: 'Sessions', href: '/sessions', icon: Monitor },
   { name: 'Data & Storage', href: '/storage', icon: HardDrive },
+  { name: 'File Manager', href: '/files', icon: Terminal },
+  { name: 'SRC Sites', href: '/sites', icon: Globe },
   { name: 'Container Builder', href: '/builder', icon: Hammer },
   { name: 'Metrics', href: '/metrics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -46,15 +52,15 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           {collapsed ? (
-            <CanfarLogo variant="icon" className="h-8 w-8" />
+            <SkaoLogo variant="icon" className="h-8 w-8" />
           ) : (
-            <CanfarLogo variant="full" className="h-7 w-auto" />
+            <SkaoLogo variant="full" className="h-7 w-auto" />
           )}
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-2 py-4">
+      <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto scrollbar-hide">
         {navigationItems.map(item => {
           const isActive = pathname === item.href
           const Icon = item.icon
@@ -108,8 +114,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       {/* Footer */}
       {!collapsed && (
         <div className="border-t border-white/10 p-4">
-          <p className="text-xs text-gray-400">Science Portal</p>
-          <p className="text-xs text-gray-500">v2.0.0</p>
+          <p className="text-xs text-gray-400">SRCNet Gateway</p>
+          <p className="text-xs text-gray-500">v1.0.0-alpha</p>
         </div>
       )}
     </aside>
