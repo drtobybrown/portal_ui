@@ -1,6 +1,4 @@
 'use client'
-
-import * as React from 'react'
 import { Terminal, Hammer, Save, Play, History, Clock, ChevronRight, FileCode } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
