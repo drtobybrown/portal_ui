@@ -1,4 +1,6 @@
 'use client'
+
+import * as React from 'react'
 import { HardDrive, RefreshCw, Cpu } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'

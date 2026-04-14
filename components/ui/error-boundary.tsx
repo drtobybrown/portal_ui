@@ -53,7 +53,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             persists.
           </p>
           {process.env.NODE_ENV === 'development' && this.state.error && (
-            <pre className="mb-4 max-w-full overflow-auto rounded-lg bg-gray-100 border border-gray-200 p-4 text-xs text-red-600">
+            <pre className="mb-4 max-w-full overflow-auto rounded-lg bg-gray-900 p-4 text-xs text-red-400">
               {this.state.error.message}
             </pre>
           )}

@@ -1,29 +1,26 @@
 'use client'
+
+import * as React from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
   Monitor,
   HardDrive,
+  Cpu,
   Settings,
   ChevronLeft,
   ChevronRight,
   BarChart3,
   Hammer,
-  Database,
-  Globe,
-  Terminal,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { SkaoLogo } from '@/components/ui/skao-logo'
+import { CanfarLogo } from '@/components/ui/canfar-logo'
 
 const navigationItems = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Data Archive', href: '/archive', icon: Database },
-  { name: 'Sessions', href: '/sessions', icon: Monitor },
+  { name: 'Sessions', href: '/sessions', icon: Monitor }, // Will now include batch
   { name: 'Data & Storage', href: '/storage', icon: HardDrive },
-  { name: 'File Manager', href: '/files', icon: Terminal },
-  { name: 'SRC Sites', href: '/sites', icon: Globe },
   { name: 'Container Builder', href: '/builder', icon: Hammer },
   { name: 'Metrics', href: '/metrics', icon: BarChart3 },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -40,7 +37,7 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-secondary transition-all duration-300 border-r border-white/10',
+        'fixed left-0 top-0 z-40 flex h-screen flex-col bg-gray-950 transition-all duration-300 border-r border-gray-800',
         collapsed ? 'w-16' : 'w-60'
       )}
       role="navigation"
@@ -50,15 +47,15 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           {collapsed ? (
-            <SkaoLogo variant="icon" className="h-8 w-8" />
+            <CanfarLogo variant="icon" className="h-8 w-8" />
           ) : (
-            <SkaoLogo variant="full" className="h-7 w-auto" />
+            <CanfarLogo variant="full" className="h-7 w-auto" />
           )}
         </Link>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 px-2 py-4 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 space-y-1 px-2 py-4">
         {navigationItems.map(item => {
           const isActive = pathname === item.href
           const Icon = item.icon
@@ -112,8 +109,8 @@ export function Sidebar({ collapsed = false, onToggle }: SidebarProps) {
       {/* Footer */}
       {!collapsed && (
         <div className="border-t border-white/10 p-4">
-          <p className="text-xs text-gray-400">SRCNet Gateway</p>
-          <p className="text-xs text-gray-500">v1.0.0-alpha</p>
+          <p className="text-xs text-gray-400">Science Portal</p>
+          <p className="text-xs text-gray-500">v2.0.0</p>
         </div>
       )}
     </aside>

@@ -1,8 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { Monitor, Plus, Search, Cpu, Terminal, Clock, CheckCircle2, AlertCircle, Loader2, ChevronDown, ChevronUp, AlertTriangle, Pause, Play, Square, Activity, RefreshCw, Network, Database } from 'lucide-react'
+<<<<<<< HEAD
+import { Monitor, Plus, Search, Filter, Cpu, Terminal, Clock, CheckCircle2, AlertCircle, Loader2, ChevronDown, ChevronUp, AlertTriangle, Pause, Play, Square, Activity, RefreshCw, Network, Database } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+=======
+import { Plus, Search, Filter } from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+>>>>>>> origin/main
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -47,6 +52,7 @@ export default function SessionsPage() {
         setExpandedJob(expandedJob === id ? null : id)
     }
 
+<<<<<<< HEAD
     const toggleJobSelection = (id: string) => {
         const newSelected = new Set(selectedJobs)
         if (newSelected.has(id)) {
@@ -76,6 +82,22 @@ export default function SessionsPage() {
                     <p className="text-sm text-gray-500">
                         Manage your interactive sessions and batch processing jobs
                     </p>
+=======
+      {/* Sessions Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {activeSessions.map(session => (
+          <Card key={session.id} className="group">
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={cn(
+                      'h-2.5 w-2.5 rounded-full',
+                      session.status === 'running' ? 'bg-green-500' : 'bg-gray-400'
+                    )}
+                  />
+                  <CardTitle className="text-base">{session.name}</CardTitle>
+>>>>>>> origin/main
                 </div>
                 <div className="flex gap-2">
                     <Button variant={activeTab === 'interactive' ? 'primary' : 'secondary'} onClick={() => setActiveTab('interactive')}>
@@ -376,7 +398,7 @@ export default function SessionsPage() {
                                                                     </Button>
                                                                 </div>
                                                             )}
-                                                            {job.status === 'paused' && (
+                                                            {(job.status as any) === 'paused' && (
                                                                 <div className="flex gap-2">
                                                                     <Button variant="secondary" size="sm" className="gap-1">
                                                                         <Play className="h-3.5 w-3.5" /> Resume
@@ -437,7 +459,7 @@ export default function SessionsPage() {
                                                             {/* Command */}
                                                             <div>
                                                                 <h4 className="text-xs font-medium uppercase text-gray-500 mb-2">Command</h4>
-                                                                <div className="bg-gray-100 text-gray-800 font-mono text-xs p-3 rounded overflow-x-auto border border-gray-200">
+                                                                <div className="bg-gray-900 text-green-400 font-mono text-xs p-3 rounded overflow-x-auto">
                                                                     $ {job.command}
                                                                 </div>
                                                             </div>
@@ -459,8 +481,8 @@ export default function SessionsPage() {
                                                                     <Button variant="ghost" size="sm" className="h-6 text-xs px-2">Download</Button>
                                                                 </div>
                                                             </h4>
-                                                            <div className="bg-gray-50 text-gray-700 font-mono text-[11px] p-4 rounded-lg flex-1 overflow-y-auto whitespace-pre border border-gray-200">
-                                                                <div className="opacity-70 border-b border-gray-200 pb-2 mb-2">--- Start of execution log for {job.id} ---</div>
+                                                            <div className="bg-gray-950 text-gray-300 font-mono text-[11px] p-4 rounded-lg flex-1 overflow-y-auto whitespace-pre border border-gray-800 shadow-inner">
+                                                                <div className="opacity-50 border-b border-gray-800 pb-2 mb-2">--- Start of execution log for {job.id} ---</div>
                                                                 {job.logs || 'No logs available.'}
                                                                 {job.status === 'running' && (
                                                                     <div className="flex items-center gap-2 mt-2 text-green-500 animate-pulse">
@@ -488,7 +510,7 @@ export default function SessionsPage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <CardTitle>Global Cluster Queue</CardTitle>
-                                    <CardDescription>All pending and running jobs across SRCNet compute sites</CardDescription>
+                                    <CardDescription>All pending and running jobs across the CANFAR cluster</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Badge variant="secondary" className="bg-blue-100 text-blue-700">127 Jobs Total</Badge>
