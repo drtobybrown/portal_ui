@@ -355,11 +355,9 @@ export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLaun
         if (activeTab === 'quick' && selectedTemplate) {
           const template = quickLaunchTemplates.find(t => t.id === selectedTemplate)
           if (template) {
-            // eslint-disable-next-line no-console
             console.info('CLI equivalent:', `canfar create ${template.kind} ${template.image}`)
           }
         } else {
-          // eslint-disable-next-line no-console
           console.info('CLI equivalent:', buildCliCommand(form.formData))
         }
       }
@@ -458,9 +456,7 @@ export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLaun
                 <h2 id="session-launcher-title" className="text-xl font-semibold text-gray-900">
                   New Session
                 </h2>
-                <p className="text-sm text-gray-500">
-                  Launch an interactive session on the SRCNet
-                </p>
+                <p className="text-sm text-gray-500">Launch an interactive session on the SRCNet</p>
               </div>
               <button
                 onClick={handleClose}

@@ -1,6 +1,4 @@
 'use client'
-
-import * as React from 'react'
 import { Plus, Upload, ClipboardList, ArrowRight } from 'lucide-react'
 
 interface QuickActionsProps {

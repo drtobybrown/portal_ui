@@ -1,6 +1,4 @@
 'use client'
-
-import * as React from 'react'
 import { Activity, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart } from '@/components/ui/chart'
