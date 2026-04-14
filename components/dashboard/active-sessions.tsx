@@ -82,13 +82,13 @@ export function ActiveSessions() {
                       </Badge>
                     </div>
                     <div className="mt-0.5 flex items-center gap-2 text-xs text-gray-500">
+                      <span>{session.site}</span>
+                      <span>•</span>
                       <span>{session.project}</span>
                       <span>•</span>
                       <span>
                         {session.cpu} CPU, {session.ram} GB RAM
                       </span>
-                      <span>•</span>
-                      <span>Net: {session.network?.in}↓ / {session.network?.out}↑</span>
                       <span>•</span>
                       <span>Scratch: {session.scratch?.used}GB</span>
                     </div>

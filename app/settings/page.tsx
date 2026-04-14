@@ -2,10 +2,9 @@
 
 import * as React from 'react'
 import { useSearchParams } from 'next/navigation'
-import { User, Bell, Shield, Palette, Key, Terminal, LogOut, Loader2 } from 'lucide-react'
+import { User, Bell, Shield, Palette, Key, Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { userData } from '@/lib/dummy-data'
 import { cn } from '@/lib/utils'
 
@@ -132,7 +131,7 @@ function SettingsContent() {
                     </label>
                     <input
                       type="text"
-                      defaultValue="University of Victoria"
+                      defaultValue="SKAO / NRC-Canada"
                       className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
@@ -188,7 +187,7 @@ function SettingsContent() {
                     <div className="flex items-center gap-3">
                       <Shield className="h-5 w-5 text-green-500" />
                       <div>
-                        <div className="text-sm font-medium">Authentication via CANFAR Portal</div>
+                        <div className="text-sm font-medium">Authentication via SKAO IAM</div>
                         <div className="text-xs text-gray-500">Enabled since Jan 2026</div>
                       </div>
                     </div>

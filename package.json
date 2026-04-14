@@ -1,13 +1,13 @@
 {
-  "name": "canfar-science-portal",
+  "name": "srcnet-gateway-ui",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
@@ -15,11 +15,11 @@
     "precommit": "npm run validate"
   },
   "dependencies": {
-    "next": "^14.2.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.344.0",
+    "next": "^16.2.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "lucide-react": "^0.344.0",
-    "clsx": "^2.1.0",
     "tailwind-merge": "^2.2.1"
   },
   "devDependencies": {
@@ -27,14 +27,14 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
-    "eslint-config-next": "^14.2.0",
+    "eslint": "^9.24.0",
+    "eslint-config-next": "^16.2.2",
     "postcss": "^8.4.35",
     "prettier": "^3.2.5",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": ">=20.9.0"
   }
 }

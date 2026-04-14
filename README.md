@@ -1,8 +1,8 @@
-# CANFAR Science Portal UI
+# SRCNet Gateway UI
 
-A modern, high-fidelity redesign of the CANFAR Science Platform portal with a clean, "Stripe-like" aesthetic - minimalist, highly readable, and user-friendly while retaining complex scientific functionality for power users.
+A modern science portal for the **SKA Regional Centre Network (SRCNet)**, built on the same design principles as the CANFAR Science Portal. It provides data staging from the SKA Science Archive, multi-site compute selection, and distributed file management across SRC sites—with SKAO brand identity (Blueshift Navy, Redshift Magenta) and a clean, user-friendly interface for both novice and expert users.
 
-![Dashboard Preview](https://img.shields.io/badge/Status-Development-blue)
+![Status](https://img.shields.io/badge/Status-Development-blue)
 
 ## Quick Start
 
@@ -18,7 +18,7 @@ npm install
 npm run dev
 ```
 
-Then open [http://localhost:3000](http://localhost:3000) in your browser.
+Then open [http://localhost:3000](http://localhost:3000) in your browser (or the port shown in the terminal if 3000 is in use).
 
 ## Tech Stack
 
@@ -31,90 +31,112 @@ Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Design System
 
-### Color Palette (UVic Brand)
+### Color Palette (SKAO Brand)
 
-| Color        | Hex       | Usage                          |
-| ------------ | --------- | ------------------------------ |
-| Primary Blue | `#005493` | Primary buttons, active states |
-| Dark Blue    | `#002754` | Sidebar, headings              |
-| Gold/Yellow  | `#F5AA1C` | Accents, warnings, highlights  |
-| Red          | `#C63527` | Errors, destructive actions    |
+| Color             | Hex       | Usage                          |
+| ----------------- | --------- | ------------------------------ |
+| Blueshift Navy    | `#070068` | Primary buttons, sidebar, brand |
+| Redshift Magenta  | `#E70068` | Accents, highlights, CTAs      |
+| 100% Black        | `#000000` | Text, dark surfaces            |
+
+Additional accent palettes (Science, Technology, Sites) are defined in `tailwind.config.ts` for charts and thematic elements.
 
 ### Typography
 
-- **Font:** Inter (via Google Fonts)
-- Clean sans-serif to maintain a modern, professional appearance
+- **Font:** Noto Sans (via Google Fonts), with Verdana as fallback per [SKAO brand guidelines](https://www.skao.int/en/skao-brand).
 
 ## Features
 
 ### Dashboard (`/`)
 
-- Personalized greeting with system status indicator
-- Resource overview with circular CPU/RAM gauges
-- Storage usage progress bars
-- 24-hour resource usage charts
-- Active sessions list with connect/terminate actions
-- Quick action buttons for common tasks
+- Personalized greeting with SRCNet system status
+- **SRC Network Status** — Quick view of compute/storage across top SRC sites
+- **Data Staging Activity** — Active and recent staging requests from the SKA Science Archive to SRC sites
+- Resource overview (CPU/RAM gauges, storage)
+- 24-hour resource history charts
+- Active sessions list with site and project
+
+### Data Archive (`/archive`)
+
+- **SKA Science Archive** search (ALMA-style interface)
+- As-you-type search by target, project code, observation ID, or coordinates
+- Filters: telescope (SKA-Mid / SKA-Low), data quality
+- Expandable observation rows (coordinates, frequency coverage, data products)
+- Bulk select and **stage data to any SRC site** (Canada, Spain, UK, Germany, Australia, South Africa, China, Sweden)
+
+### SRC Sites (`/sites`)
+
+- Overview of all **SKA Regional Centre** sites
+- Per-site status, latency, CPU/RAM/storage usage
+- Provider and location for each SRC
+
+### File Manager (`/files`)
+
+- **File Browser** — Navigate project and home storage with copy, move, mkdir, upload, delete
+- **Terminal** — POSIX-like commands: `ls`, `cd`, `pwd`, `mkdir`, `cp`, `mv`, `rm`
+- **CANFAR CLI integration** — `canfar auth login`, `canfar ps`, `canfar stats` (modeled on [opencadc/canfar](https://github.com/opencadc/canfar/tree/main/canfar/cli))
+- Site selector to switch context between SRC sites
+- Cross-site file transfer panel
 
 ### Session Launcher
 
-- **Standard Mode:** Template cards for quick launch (Jupyter, CARTA, Desktop)
-- **Advanced Mode:** Full configuration with custom containers, resource allocation
+- **Quick Launch** — Template cards (SKA Data Analysis, CARTA, Desktop, CASA) + **SRC site selector**
+- **Custom Configuration** — Full config with **compute site** (Canada, UK, Australia, South Africa, Spain, Germany, China, Sweden), container image, CPU/RAM/GPU, env vars
+- CLI equivalent preview (`canfar create --site ...`)
 
 ### My Sessions (`/sessions`)
 
-- Grid view of all active sessions
-- Filter and search capabilities
-- Session management (connect, stop)
+- Grid view of active sessions with **SRC site** and project
+- Batch jobs and cluster queue views
 
 ### Data & Storage (`/storage`)
 
-- VOSpace file browser
+- Project and home storage browser
 - Storage quota visualization
-- File upload interface
 
 ### Batch Processing (`/batch`)
 
 - Job queue monitoring
-- Job submission interface
-- Status tracking with CPU hours
+- Job submission (with site context)
+- Status and logs
 
 ### Metrics (`/metrics`)
 
-- **Platform Resources Tab:** Node CPU/Memory usage, active sessions, network I/O
-- **Job Performance Tab:** Success rates, duration trends, queue wait times
-- Grafana-style panel layout with time range selector
+- Platform and job performance dashboards
+- Time range selector
 
 ### Settings (`/settings`)
 
-- Profile management
-- Notification preferences
-- (More sections coming soon)
+- Profile, notifications, security (SKAO IAM), API access
 
 ## Documentation
 
-- **[Architecture Summary](./ARCHITECTURE_SUMMARY.md)** — Technical architecture, data flow, extension points for developers and AI agents, and security review.
+- **[Architecture Summary](./ARCHITECTURE_SUMMARY.md)** — Technical architecture, data flow, and extension points (if present).
 
 ## Project Structure
 
 ```
-├── app/                    # Next.js App Router pages
-│   ├── layout.tsx         # Root layout with sidebar + header
-│   ├── page.tsx           # Dashboard
-│   ├── sessions/          # Sessions management
+├── app/
+│   ├── layout.tsx         # Root layout (Noto Sans, SRCNet metadata)
+│   ├── page.tsx           # Dashboard (SRC status, staging activity)
+│   ├── archive/           # SKA Science Archive search & staging
+│   ├── sites/             # SRC Network status
+│   ├── files/             # File Manager (browser + terminal)
+│   ├── sessions/          # Sessions & batch jobs
 │   ├── storage/           # Data & storage
 │   ├── batch/             # Batch processing
+│   ├── builder/           # Container image builder
 │   ├── metrics/           # Monitoring dashboards
 │   └── settings/          # User settings
 ├── components/
-│   ├── dashboard/         # Dashboard-specific components
-│   ├── layout/            # Sidebar, Header
-│   ├── session-launcher/  # Session launch modal
-│   └── ui/                # Reusable UI components
+│   ├── dashboard/         # Dashboard components
+│   ├── layout/            # Sidebar, Header (SKAO logo)
+│   ├── session-launcher/  # Session launch modal (with site selector)
+│   └── ui/                # Reusable UI (SKAO logo, badges, etc.)
 ├── lib/
-│   ├── dummy-data.ts      # Mock data for development
-│   └── utils.ts           # Utility functions
-└── tailwind.config.ts     # Tailwind with UVic brand colors
+│   ├── dummy-data.ts      # Mock SRC sites, archive, staging, sessions
+│   └── utils.ts           # Utilities
+└── tailwind.config.ts     # SKAO brand colors & theme
 ```
 
 ## Available Scripts
@@ -124,40 +146,49 @@ npm run dev      # Start development server (http://localhost:3000)
 npm run build    # Build for production
 npm run start    # Start production server
 npm run lint     # Run ESLint
+npm run validate # Type-check + lint + format check
 ```
 
 ## Design Principles
 
-1. **Action-Oriented:** Default views prioritize "Launch Notebook" over "Select Container Image"
-2. **Progressive Disclosure:** Advanced options hidden behind toggles
-3. **Visual Hierarchy:** Clear distinction between primary and secondary actions
-4. **Responsive:** Optimized for desktop and tablet devices
+1. **Usability first** — Works for both novice and expert users.
+2. **Progressive disclosure** — Advanced options (custom image, fixed resources, env vars) in Custom mode.
+3. **Multi-site by design** — Choose where to stage data and run compute (8 SRC sites).
+4. **CLI-aligned** — Session launcher and file manager reflect canfar CLI concepts (auth, create, ps, stats) for consistency.
 
 ## Current Status
 
-This is a **dummy UI prototype** with mock data. It demonstrates the proposed visual design and interaction patterns for the CANFAR Science Portal redesign.
+This is a **UI prototype** with mock data. It demonstrates the SRCNet Gateway experience: SKAO branding, archive search and staging, multi-site compute, and file operations across SRCs.
 
-### What's Implemented
+### Implemented
 
-- [x] Global layout (collapsible sidebar, header with search)
-- [x] Dashboard with resource gauges and session list
-- [x] Session launcher modal (Standard/Advanced modes)
-- [x] All navigation pages with dummy content
-- [x] Metrics/monitoring dashboards
-- [x] Responsive design
+- [x] SRCNet/SKAO rebrand (colors, typography, logo)
+- [x] Dashboard with SRC status and data staging activity
+- [x] Data Archive page with search, filters, and stage-to-SRC
+- [x] SRC Sites overview (8 sites)
+- [x] File Manager (browser + terminal with ls/cd/canfar commands)
+- [x] Session launcher with SRC site selection
+- [x] Sessions, storage, batch, metrics, settings pages
+- [x] Responsive layout
 
-### What's Next
+### Next Steps
 
-- [ ] Connect to real CANFAR APIs
-- [ ] Authentication integration
-- [ ] Real-time session updates
-- [ ] File upload functionality
-- [ ] Job submission workflow
+- [ ] Connect to SKA Science Archive and staging APIs
+- [ ] Authentication (SKAO IAM / OAuth)
+- [ ] Real canfar CLI or SRCNet backend for sessions and file ops
+- [ ] Real-time session and staging status
+
+## References
+
+- [SKAO Brand](https://www.skao.int/en/skao-brand) — Colours, typography, logo usage
+- [SKAO](https://www.skao.int/en) — SKA Observatory
+- [CANFAR CLI](https://github.com/opencadc/canfar/tree/main/canfar/cli) — Auth, create, ps, stats, etc.
+- [ALMA Science Archive](https://almascience.nrao.edu/aq/) — Archive UI reference for data staging
 
 ## Contributing
 
-This is an internal project for the CANFAR team. Please reach out before making changes.
+This project extends the CANFAR Science Portal UI for SRCNet. Please coordinate with the maintainers before making large changes.
 
 ## License
 
-Internal use only - CANFAR / Canadian Astronomy Data Centre
+Internal use — SRCNet / SKA Observatory.
