@@ -14,14 +14,14 @@ export function GreetingCard() {
   }, [])
 
   return (
-    <Card className="border-none bg-skao-gradient-subtle shadow-lg">
+    <Card className="border-none bg-gradient-to-r from-secondary to-primary shadow-lg">
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-semibold text-white">
               {greeting}, {userData.name}
             </h1>
-            <p className="mt-1 text-sm text-white/70">Welcome back to the SRCNet Gateway</p>
+            <p className="mt-1 text-sm text-white/70">Welcome back to the CANFAR Science Portal</p>
           </div>
 
           {/* System status */}

@@ -20,12 +20,11 @@ import {
   HardDrive,
   Zap,
   AlertCircle,
-  Globe,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { sessionTypes, containerImages, quickLaunchTemplates, srcSites } from '@/lib/dummy-data'
+import { sessionTypes, containerImages, quickLaunchTemplates } from '@/lib/dummy-data'
 
 // ============================================================================
 // Types
@@ -44,7 +43,6 @@ interface FormData {
   kind: string
   image: string
   name: string
-  site: string
   resourceMode: 'flexible' | 'fixed'
   cpu: number
   memory: number
@@ -79,7 +77,6 @@ const INITIAL_FORM_DATA: FormData = {
   kind: 'notebook',
   image: '',
   name: '',
-  site: 'src-canada',
   resourceMode: 'flexible',
   cpu: 2,
   memory: 8,
@@ -164,10 +161,6 @@ function buildCliCommand(data: FormData): string {
   const parts = ['canfar create']
 
   if (data.name) parts.push(`--name ${data.name}`)
-  if (data.site) {
-    const site = srcSites.find(s => s.id === data.site)
-    if (site) parts.push(`--site ${site.id}`)
-  }
   if (data.resourceMode === 'fixed') {
     parts.push(`--cpu ${data.cpu}`)
     parts.push(`--memory ${data.memory}`)
@@ -355,9 +348,11 @@ export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLaun
         if (activeTab === 'quick' && selectedTemplate) {
           const template = quickLaunchTemplates.find(t => t.id === selectedTemplate)
           if (template) {
+            // eslint-disable-next-line no-console
             console.info('CLI equivalent:', `canfar create ${template.kind} ${template.image}`)
           }
         } else {
+          // eslint-disable-next-line no-console
           console.info('CLI equivalent:', buildCliCommand(form.formData))
         }
       }
@@ -456,7 +451,9 @@ export function SessionLauncher({ open, onClose, onSessionCreated }: SessionLaun
                 <h2 id="session-launcher-title" className="text-xl font-semibold text-gray-900">
                   New Session
                 </h2>
-                <p className="text-sm text-gray-500">Launch an interactive session on the SRCNet</p>
+                <p className="text-sm text-gray-500">
+                  Launch an interactive session on the Science Platform
+                </p>
               </div>
               <button
                 onClick={handleClose}
@@ -568,34 +565,11 @@ interface QuickLaunchPanelProps {
 }
 
 function QuickLaunchPanel({ selectedTemplate, onSelectTemplate }: QuickLaunchPanelProps) {
-  const [selectedSite, setSelectedSite] = React.useState('src-canada')
-
   return (
     <div role="tabpanel" id="quick-panel" aria-labelledby="quick-tab" className="space-y-4">
       <p className="text-sm text-gray-500">
-        Choose a template and SRC site for quick launch with default settings.
+        Choose a pre-configured session template for quick launch with default settings.
       </p>
-
-      {/* SRC Site Selector */}
-      <div>
-        <label className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700">
-          <Globe className="h-4 w-4 text-gray-400" />
-          Compute Site
-        </label>
-        <select
-          value={selectedSite}
-          onChange={e => setSelectedSite(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-        >
-          {srcSites
-            .filter(s => s.status === 'online')
-            .map(site => (
-              <option key={site.id} value={site.id}>
-                {site.flag} {site.name} — {site.location} ({site.latency}ms)
-              </option>
-            ))}
-        </select>
-      </div>
       <div className="grid gap-4 sm:grid-cols-2" role="radiogroup" aria-label="Session templates">
         {quickLaunchTemplates.map(template => (
           <button
@@ -776,9 +750,9 @@ function CustomConfigPanel({
               <input
                 id="custom-image"
                 type="text"
-                value={formData.image.startsWith('registry.srcnet.skao.int') ? '' : formData.image}
+                value={formData.image.startsWith('images.canfar.net') ? '' : formData.image}
                 onChange={e => onUpdateField('image', e.target.value)}
-                placeholder="e.g., registry.srcnet.skao.int/myproject/myimage:tag"
+                placeholder="e.g., images.canfar.net/myproject/myimage:tag"
                 className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 font-mono text-sm text-gray-700 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                 aria-describedby={errors.image ? 'image-error' : undefined}
               />
@@ -828,32 +802,6 @@ function CustomConfigPanel({
             {errors.name}
           </p>
         )}
-      </div>
-
-      {/* SRC Site Selection */}
-      <div>
-        <label
-          htmlFor="src-site"
-          className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-700"
-        >
-          <Globe className="h-4 w-4 text-gray-400" />
-          Compute Site
-          <span className="text-xs font-normal text-red-500">*</span>
-        </label>
-        <select
-          id="src-site"
-          value={formData.site}
-          onChange={e => onUpdateField('site', e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-        >
-          {srcSites
-            .filter(s => s.status === 'online')
-            .map(site => (
-              <option key={site.id} value={site.id}>
-                {site.flag} {site.name} — {site.location} ({site.latency}ms)
-              </option>
-            ))}
-        </select>
       </div>
 
       {/* Resource Allocation */}

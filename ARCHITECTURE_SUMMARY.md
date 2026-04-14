@@ -1,7 +1,7 @@
 # CANFAR Science Portal UI — Architecture Summary
 
 **Audience:** Development team, AI agents extending this codebase  
-**Last updated:** 2026-01-28
+**Last updated:** 2026-01
 
 ---
 
@@ -25,20 +25,18 @@ science_portal_ui/
 │   ├── layout.tsx           # Root layout (font, metadata, LayoutProvider)
 │   ├── page.tsx             # Dashboard (/)
 │   ├── globals.css          # Tailwind + custom animations
-│   ├── batch/page.tsx       # Batch processing jobs (status: completed | running | queued | failed | paused)
-│   ├── builder/page.tsx    # Build history / image builder placeholder
+│   ├── batch/page.tsx       # Batch processing placeholder
 │   ├── metrics/page.tsx     # Grafana-style monitoring
-│   ├── sessions/page.tsx    # Session management (My Workloads, queue, batch)
+│   ├── sessions/page.tsx    # Session management
 │   ├── settings/page.tsx    # User settings placeholder
-│   └── storage/page.tsx     # Data & storage (vospace/arc, locations, file list)
+│   └── storage/page.tsx     # Data/storage placeholder
 ├── components/
 │   ├── dashboard/           # Dashboard-specific
 │   │   ├── greeting-card.tsx
 │   │   ├── resource-gauge.tsx
 │   │   ├── resource-history.tsx
 │   │   ├── active-sessions.tsx
-│   │   ├── quick-actions.tsx
-│   │   └── session-resource-monitor.tsx
+│   │   └── quick-actions.tsx
 │   ├── layout/
 │   │   ├── sidebar.tsx      # Main nav (dark blue)
 │   │   ├── header.tsx      # Search, notifications, user
@@ -49,7 +47,6 @@ science_portal_ui/
 │       ├── button.tsx, badge.tsx, card.tsx, progress.tsx
 │       ├── chart.tsx       # LineChart, BarChart, GrafanaPanel
 │       ├── canfar-logo.tsx # SVG logo component
-│       ├── command-palette.tsx  # Global search/nav (Cmd+K)
 │       └── error-boundary.tsx
 ├── lib/
 │   ├── dummy-data.ts       # All mock data (sessions, metrics, templates)
@@ -67,9 +64,8 @@ science_portal_ui/
 ┌─────────────────────────────────────────────────────────────────┐
 │  lib/dummy-data.ts (single source of mock data)                  │
 │  - userData, platformLoad, userStorage, activeSessions           │
-│  - recentJobs (status: completed|running|queued|failed|paused)   │
 │  - sessionTypes, containerImages, quickLaunchTemplates           │
-│  - cpuUsageHistory, ramUsageHistory, platformMetrics (static)    │
+│  - cpuUsageHistory, ramUsageHistory, platformMetrics, etc.      │
 └─────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -225,13 +221,3 @@ npm run validate   # type-check + lint + format:check
 
 - [README.md](./README.md) — Quick start, features, design system
 - [CANFAR CLI Reference](https://www.opencadc.org/canfar/latest/cli/cli-help/) — Session creation parameters
-
----
-
-## 10. Recent Changes (Session Summary)
-
-- **Theme:** UI reverted to light mode (sidebar `bg-secondary`, header/content light backgrounds, dark text).
-- **Hydration:** All chart/time-series data in `lib/dummy-data.ts` is static arrays (no `Math.random()` or `new Date()`) so server and client HTML match.
-- **Job status:** `recentJobs` supports `paused`; `statusConfig` in batch and sessions includes `paused` (icon: Pause, badge: default).
-- **Build/ESLint:** Unused imports and variables removed across app and components; `cn` imported from `@/lib/utils` in builder; no `as any` for job status; build passes.
-- **Architecture:** This document kept in sync with current routes (including builder), dashboard widgets (session-resource-monitor), and UI (command-palette).
